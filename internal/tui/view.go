@@ -19,6 +19,10 @@ func (m Model) View() string {
 		content = m.viewTimer()
 	case screenComplete:
 		content = m.viewComplete()
+	case screenCustomize:
+		content = m.viewCustomize()
+	case screenEdit:
+		content = m.viewEdit()
 	}
 
 	if m.width > 0 && m.height > 0 {
@@ -39,6 +43,14 @@ func (m Model) viewSelect() string {
 			prefix = "> "
 			style = selectedItemStyle
 		}
+
+		// Handle empty custom slot
+		if i == 2 && m.cfg.Custom == nil {
+			line := fmt.Sprintf("%s%s", prefix, w.Name)
+			items += style.Render(line) + "\n"
+			continue
+		}
+
 		totalTime := formatDuration(calcTotalTime(w.Steps))
 		loopIndicator := ""
 		if w.Loop {
@@ -48,7 +60,7 @@ func (m Model) viewSelect() string {
 		items += style.Render(line) + "\n"
 	}
 
-	help := helpStyle.Render("[j/k] navigate  [enter] select  [q] quit")
+	help := helpStyle.Render("[j/k] navigate  [enter] select  [c] customize  [q] quit")
 
 	return containerStyle.Render(
 		lipgloss.JoinVertical(lipgloss.Center, title, subtitle, "", items, help),

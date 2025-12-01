@@ -30,6 +30,10 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.handleTimerKey(msg)
 	case screenComplete:
 		return m.handleCompleteKey(msg)
+	case screenCustomize:
+		return m.updateCustomize(msg)
+	case screenEdit:
+		return m.updateEdit(msg)
 	}
 	return m, nil
 }
@@ -47,9 +51,17 @@ func (m Model) handleSelectKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.cursor++
 		}
 	case "enter", " ":
+		// Don't start empty workflow
+		if m.cursor == 2 && m.cfg.Custom == nil {
+			return m, nil
+		}
 		m.session = m.startWorkflow(m.cursor)
 		m.screen = screenTimer
 		return m, tea.Batch(tickCmd(), m.updateTitle())
+	case "c":
+		m.screen = screenCustomize
+		m.cursor = 0
+		return m, nil
 	}
 	return m, nil
 }

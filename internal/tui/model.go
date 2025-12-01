@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/0xjuanma/helm/internal/config"
 	"github.com/0xjuanma/helm/internal/timer"
 	"github.com/0xjuanma/helm/internal/workflow"
 )
@@ -18,6 +19,8 @@ const (
 	screenSelect screen = iota
 	screenTimer
 	screenComplete
+	screenCustomize
+	screenEdit
 )
 
 type tickMsg time.Time
@@ -25,17 +28,21 @@ type tickMsg time.Time
 type Model struct {
 	screen      screen
 	workflows   []workflow.Workflow
+	cfg         *config.Config
 	cursor      int
 	session     *timer.Session
 	progressBar progress.Model
+	edit        *editState
 	width       int
 	height      int
 }
 
 func NewModel() Model {
+	cfg, _ := config.Load()
 	return Model{
 		screen:      screenSelect,
-		workflows:   workflow.Presets,
+		workflows:   cfg.BuildWorkflows(),
+		cfg:         cfg,
 		cursor:      0,
 		progressBar: newProgressBar(),
 	}
