@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+- Improved timer package efficiency by reusing timer instances
+- Simplified state management logic
+- Added comprehensive unit test coverage for timer and session
+
 ### Added
 - Initial release of Helm TUI Pomodoro timer
 - Pomodoro workflow with classic 25/5 minute cycles

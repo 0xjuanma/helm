@@ -25,9 +25,7 @@ func New(d time.Duration) *Timer {
 }
 
 func (t *Timer) Start() {
-	if t.State != Running {
-		t.State = Running
-	}
+	t.State = Running
 }
 
 func (t *Timer) Pause() {
@@ -46,7 +44,12 @@ func (t *Timer) Toggle() {
 }
 
 func (t *Timer) Reset() {
-	t.Remaining = t.Duration
+	t.ResetWith(t.Duration)
+}
+
+func (t *Timer) ResetWith(d time.Duration) {
+	t.Duration = d
+	t.Remaining = d
 	t.State = Stopped
 }
 

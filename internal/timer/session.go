@@ -15,13 +15,17 @@ func NewSession(w *workflow.Workflow) *Session {
 	s := &Session{
 		Workflow:    w,
 		CurrentStep: 0,
+		Timer:       New(w.Steps[0].Duration),
 	}
-	s.Timer = New(w.Steps[0].Duration)
 	return s
 }
 
+func (s *Session) currentStep() workflow.Step {
+	return s.Workflow.Steps[s.CurrentStep]
+}
+
 func (s *Session) CurrentStepName() string {
-	return s.Workflow.Steps[s.CurrentStep].Name
+	return s.currentStep().Name
 }
 
 func (s *Session) StepProgress() (current, total int) {
@@ -38,12 +42,11 @@ func (s *Session) NextStep() {
 			return
 		}
 	}
-	s.Timer = New(s.Workflow.Steps[s.CurrentStep].Duration)
+	s.Timer.ResetWith(s.currentStep().Duration)
 }
 
 func (s *Session) Reset() {
 	s.CurrentStep = 0
 	s.Completed = false
-	s.Timer = New(s.Workflow.Steps[0].Duration)
+	s.Timer.ResetWith(s.currentStep().Duration)
 }
-
