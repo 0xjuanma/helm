@@ -10,10 +10,9 @@ type Step struct {
 type Workflow struct {
 	Name  string
 	Steps []Step
-	Loop  bool // If true, restart from beginning after last step
+	Loop  bool
 }
 
 func (w *Workflow) StepCount() int {
 	return len(w.Steps)
 }
-
