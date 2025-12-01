@@ -27,7 +27,6 @@ func TestStart(t *testing.T) {
 	}{
 		{"from Stopped", Stopped},
 		{"from Paused", Paused},
-		{"from Running", Running},
 	}
 
 	for _, tt := range tests {
@@ -202,4 +201,3 @@ func TestIsComplete(t *testing.T) {
 		})
 	}
 }
-

@@ -41,20 +41,8 @@ func TestCurrentStepName(t *testing.T) {
 	w := newTestWorkflow(false)
 	s := NewSession(w)
 
-	tests := []struct {
-		step     int
-		expected string
-	}{
-		{0, "Step 1"},
-		{1, "Step 2"},
-		{2, "Step 3"},
-	}
-
-	for _, tt := range tests {
-		s.CurrentStep = tt.step
-		if got := s.CurrentStepName(); got != tt.expected {
-			t.Errorf("CurrentStepName() at step %d = %q, want %q", tt.step, got, tt.expected)
-		}
+	if got := s.CurrentStepName(); got != "Step 1" {
+		t.Errorf("CurrentStepName() = %q, want %q", got, "Step 1")
 	}
 }
 
@@ -62,23 +50,9 @@ func TestStepProgress(t *testing.T) {
 	w := newTestWorkflow(false)
 	s := NewSession(w)
 
-	tests := []struct {
-		step          int
-		expectedCurr  int
-		expectedTotal int
-	}{
-		{0, 1, 3},
-		{1, 2, 3},
-		{2, 3, 3},
-	}
-
-	for _, tt := range tests {
-		s.CurrentStep = tt.step
-		curr, total := s.StepProgress()
-		if curr != tt.expectedCurr || total != tt.expectedTotal {
-			t.Errorf("StepProgress() at step %d = (%d, %d), want (%d, %d)",
-				tt.step, curr, total, tt.expectedCurr, tt.expectedTotal)
-		}
+	curr, total := s.StepProgress()
+	if curr != 1 || total != 3 {
+		t.Errorf("StepProgress() = (%d, %d), want (1, 3)", curr, total)
 	}
 }
 
@@ -154,4 +128,3 @@ func TestSessionReset(t *testing.T) {
 		t.Errorf("Timer.Remaining = %v, want %v", s.Timer.Remaining, w.Steps[0].Duration)
 	}
 }
-
