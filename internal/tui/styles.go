@@ -12,6 +12,10 @@ var (
 			Foreground(highlight).
 			MarginBottom(1)
 
+	subtitleStyle = lipgloss.NewStyle().
+			Foreground(subtle).
+			MarginBottom(1)
+
 	timerStyle = lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color("#FFFFFF")).
@@ -31,6 +35,18 @@ var (
 	sessionStyle = lipgloss.NewStyle().
 			Foreground(accent).
 			MarginTop(1)
+
+	itemStyle = lipgloss.NewStyle().
+			Foreground(subtle)
+
+	selectedItemStyle = lipgloss.NewStyle().
+				Foreground(highlight).
+				Bold(true)
+
+	completeStyle = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(accent).
+			MarginBottom(1)
 
 	containerStyle = lipgloss.NewStyle().
 			Align(lipgloss.Center).

@@ -6,26 +6,40 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/0xjuanma/helm/internal/timer"
+	"github.com/0xjuanma/helm/internal/workflow"
 )
 
 const tickInterval = time.Second
 
+type screen int
+
+const (
+	screenSelect screen = iota
+	screenTimer
+	screenComplete
+)
+
 type tickMsg time.Time
 
 type Model struct {
-	pomodoro *timer.Pomodoro
-	width    int
-	height   int
+	screen    screen
+	workflows []workflow.Workflow
+	cursor    int
+	session   *timer.Session
+	width     int
+	height    int
 }
 
 func NewModel() Model {
 	return Model{
-		pomodoro: timer.NewPomodoro(),
+		screen:    screenSelect,
+		workflows: workflow.Presets,
+		cursor:    0,
 	}
 }
 
 func (m Model) Init() tea.Cmd {
-	return tickCmd()
+	return nil
 }
 
 func tickCmd() tea.Cmd {
