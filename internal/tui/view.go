@@ -33,10 +33,10 @@ func (m Model) viewSelect() string {
 
 	var items string
 	for i, w := range m.workflows {
-		cursor := "  "
+		prefix := "  "
 		style := itemStyle
 		if i == m.cursor {
-			cursor = "> "
+			prefix = "> "
 			style = selectedItemStyle
 		}
 		totalTime := formatDuration(calcTotalTime(w.Steps))
@@ -44,7 +44,7 @@ func (m Model) viewSelect() string {
 		if w.Loop {
 			loopIndicator = " [loop]"
 		}
-		line := fmt.Sprintf("%s%s (%s)%s", cursor, w.Name, totalTime, loopIndicator)
+		line := fmt.Sprintf("%s%s (%s)%s", prefix, w.Name, totalTime, loopIndicator)
 		items += style.Render(line) + "\n"
 	}
 
@@ -56,41 +56,79 @@ func (m Model) viewSelect() string {
 }
 
 func (m Model) viewTimer() string {
-	title := titleStyle.Render(m.session.CurrentStepName())
+	isRunning := m.session.Timer.State == timer.Running
 
+	// Step label with colored background
+	var stepLabel string
+	if isRunning {
+		stepLabel = stepLabelStyle.Render(m.session.CurrentStepName())
+	} else {
+		stepLabel = stepLabelPausedStyle.Render(m.session.CurrentStepName())
+	}
+
+	// Large timer display
+	remaining := m.session.Timer.Remaining
+	minutes := int(remaining.Minutes())
+	seconds := int(remaining.Seconds()) % 60
+	timeStr := fmt.Sprintf("%02d:%02d", minutes, seconds)
+	largeTime := renderLargeTime(timeStr)
+
+	var timerDisplay string
+	if isRunning {
+		timerDisplay = timerLargeStyle.Render(largeTime)
+	} else {
+		timerDisplay = timerPausedLargeStyle.Render(largeTime)
+	}
+
+	// Progress bar
+	prog := m.progress()
+	var progressDisplay string
+	if isRunning {
+		progressDisplay = progressContainerStyle.Render(m.progressBar.ViewAs(prog))
+	} else {
+		pausedBar := newPausedProgressBar()
+		progressDisplay = progressContainerStyle.Render(pausedBar.ViewAs(prog))
+	}
+
+	// Step progress
 	current, total := m.session.StepProgress()
-	progress := sessionStyle.Render(fmt.Sprintf("Step %d of %d", current, total))
+	stepProgress := sessionStyle.Render(fmt.Sprintf("Step %d/%d", current, total))
 
-	timerDisplay := m.renderTimer()
-
+	// Workflow name
 	workflowName := subtitleStyle.Render(m.session.Workflow.Name)
+
+	// Status indicator
+	var status string
+	if !isRunning {
+		status = subtitleStyle.Render("PAUSED")
+	}
+
 	help := helpStyle.Render("[space] start/pause  [r] reset  [n] skip  [esc] back  [q] quit")
 
+	elements := []string{workflowName, stepLabel, "", timerDisplay, progressDisplay, stepProgress}
+	if status != "" {
+		elements = append(elements, status)
+	}
+	elements = append(elements, help)
+
 	return containerStyle.Render(
-		lipgloss.JoinVertical(lipgloss.Center, workflowName, title, timerDisplay, progress, help),
+		lipgloss.JoinVertical(lipgloss.Center, elements...),
 	)
 }
 
 func (m Model) viewComplete() string {
+	checkmark := renderLargeTime("00:00")
 	title := completeStyle.Render("COMPLETE")
 	message := subtitleStyle.Render(fmt.Sprintf("%s finished", m.session.Workflow.Name))
+
+	// Full progress bar
+	fullBar := progressContainerStyle.Render(m.progressBar.ViewAs(1.0))
+
 	help := helpStyle.Render("[r] restart  [enter] back to menu  [q] quit")
 
 	return containerStyle.Render(
-		lipgloss.JoinVertical(lipgloss.Center, title, "", message, "", help),
+		lipgloss.JoinVertical(lipgloss.Center, title, "", completeStyle.Render(checkmark), fullBar, message, "", help),
 	)
-}
-
-func (m Model) renderTimer() string {
-	remaining := m.session.Timer.Remaining
-	minutes := int(remaining.Minutes())
-	seconds := int(remaining.Seconds()) % 60
-	display := fmt.Sprintf("%02d:%02d", minutes, seconds)
-
-	if m.session.Timer.State == timer.Running {
-		return timerStyle.Render(display)
-	}
-	return pausedStyle.Render(display)
 }
 
 func calcTotalTime(steps []workflow.Step) time.Duration {
