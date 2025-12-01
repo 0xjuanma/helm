@@ -1,0 +1,12 @@
+name: Post-Release Changelog Update
+
+on:
+  repository_dispatch:
+    types: [release-published]
+
+jobs:
+  update-changelog:
+    uses: 0xjuanma/simple-release/.github/workflows/reusable-post-release-changelog.yml@main
+    secrets:
+      TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
