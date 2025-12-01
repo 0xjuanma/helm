@@ -50,4 +50,3 @@ func (s *Session) Reset() {
 	s.Completed = false
 	s.Timer.ResetWith(s.currentStep().Duration)
 }
-
