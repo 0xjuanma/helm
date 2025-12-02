@@ -4,9 +4,12 @@ on:
   repository_dispatch:
     types: [release-published]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update-changelog:
     uses: 0xjuanma/simple-release/.github/workflows/reusable-post-release-changelog.yml@main
     secrets:
       TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

@@ -4,6 +4,9 @@ on:
   push:
     tags: ['v*.*.*']
 
+permissions:
+  contents: write
+
 jobs:
   release:
     uses: 0xjuanma/simple-release/.github/workflows/reusable-release.yml@main
@@ -11,4 +14,3 @@ jobs:
       changelog-path: 'CHANGELOG.md'
     secrets:
       RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
