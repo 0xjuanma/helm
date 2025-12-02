@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Fixed
+
+## [0.3.1] - 2025-12-01
+
 ### Changed
 - Improved timer package efficiency by reusing timer instances
 - Simplified state management logic
