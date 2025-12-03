@@ -9,8 +9,8 @@ const progressWidth = 40
 
 var (
 	subtle    = lipgloss.AdaptiveColor{Light: "#666666", Dark: "#888888"}
-	highlight = lipgloss.AdaptiveColor{Light: "#C41E3A", Dark: "#FF6B6B"}
-	teal      = lipgloss.AdaptiveColor{Light: "#3BA99C", Dark: "#4ECDC4"}
+	highlight = lipgloss.AdaptiveColor{Light: "#4A6B8A", Dark: "#6B8BA4"} // Steel blue (from helm logo)
+	gold      = lipgloss.AdaptiveColor{Light: "#C7920A", Dark: "#F9A825"} // Gold (from helm logo)
 	accent    = lipgloss.AdaptiveColor{Light: "#2E7D32", Dark: "#81C784"}
 	muted     = lipgloss.AdaptiveColor{Light: "#AAAAAA", Dark: "#555555"}
 	white     = lipgloss.AdaptiveColor{Light: "#333333", Dark: "#FFFFFF"}
@@ -25,7 +25,7 @@ var (
 	// Large timer display using ASCII art-style numbers
 	timerLargeStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(highlight). // Red accent
+			Foreground(highlight). // Steel blue accent
 			MarginTop(1).
 			MarginBottom(1)
 
@@ -36,8 +36,8 @@ var (
 				MarginBottom(1)
 
 	stepLabelStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#1a1a1a")). // Dark text on teal
-			Background(teal).
+			Foreground(lipgloss.Color("#1a1a1a")). // Dark text on gold
+			Background(gold).
 			Padding(0, 2).
 			Bold(true)
 
@@ -66,7 +66,7 @@ var (
 
 	completeStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(teal)
+			Foreground(gold)
 
 	completeTimerStyle = lipgloss.NewStyle().
 				Bold(true).
@@ -82,11 +82,11 @@ var (
 
 	// Transition styles for auto-transition between stages
 	transitionStyle = lipgloss.NewStyle().
-			Foreground(teal).
+			Foreground(gold).
 			Bold(true)
 
 	transitionPulseStyle = lipgloss.NewStyle().
-				Foreground(teal).
+				Foreground(gold).
 				Bold(true)
 
 	transitionDimStyle = lipgloss.NewStyle().
@@ -94,15 +94,15 @@ var (
 				Bold(false)
 
 	transitionLabelStyle = lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#1a1a1a")). // Dark text on teal
-				Background(teal).
+				Foreground(lipgloss.Color("#1a1a1a")). // Dark text on gold
+				Background(gold).
 				Padding(0, 2).
 				Bold(true)
 )
 
 func newProgressBar() progress.Model {
 	p := progress.New(
-		progress.WithGradient("#FF6B6B", "#4ECDC4"), // Red → Teal gradient
+		progress.WithGradient("#6B8BA4", "#F9A825"), // Steel → Gold gradient
 		progress.WithWidth(progressWidth),
 		progress.WithoutPercentage(),
 	)
