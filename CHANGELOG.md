@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- Add auto-transition feature for all workflows
 
 ### Changed
 
