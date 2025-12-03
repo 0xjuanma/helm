@@ -70,14 +70,14 @@ func (m Model) viewSelect() string {
 func (m Model) viewTimer() string {
 	isRunning := m.session.Timer.State == timer.Running
 
-	// Handle transition view
-	if m.transitioning {
-		return m.viewTransition()
-	}
+	// Workflow name
+	workflowName := subtitleStyle.Render(m.session.Workflow.Name)
 
 	// Step label with colored background
 	var stepLabel string
-	if isRunning {
+	if m.transitioning {
+		stepLabel = transitionLabelStyle.Render(m.session.CurrentStepName())
+	} else if isRunning {
 		stepLabel = stepLabelStyle.Render(m.session.CurrentStepName())
 	} else {
 		stepLabel = stepLabelPausedStyle.Render(m.session.CurrentStepName())
@@ -91,85 +91,53 @@ func (m Model) viewTimer() string {
 	largeTime := renderLargeTime(timeStr)
 
 	var timerDisplay string
-	if isRunning {
+	if isRunning && !m.transitioning {
 		timerDisplay = timerLargeStyle.Render(largeTime)
 	} else {
 		timerDisplay = timerPausedLargeStyle.Render(largeTime)
 	}
 
 	// Progress bar
-	prog := m.progress()
 	var progressDisplay string
-	if isRunning {
-		progressDisplay = progressContainerStyle.Render(m.progressBar.ViewAs(prog))
+	if m.transitioning {
+		progressDisplay = progressContainerStyle.Render(m.progressBar.ViewAs(0))
+	} else if isRunning {
+		progressDisplay = progressContainerStyle.Render(m.progressBar.ViewAs(m.progress()))
 	} else {
 		pausedBar := newPausedProgressBar()
-		progressDisplay = progressContainerStyle.Render(pausedBar.ViewAs(prog))
+		progressDisplay = progressContainerStyle.Render(pausedBar.ViewAs(m.progress()))
 	}
 
 	// Step progress
 	current, total := m.session.StepProgress()
 	stepProgress := sessionStyle.Render(fmt.Sprintf("Step %d/%d", current, total))
 
-	// Workflow name
-	workflowName := subtitleStyle.Render(m.session.Workflow.Name)
-
-	// Status indicator
+	// Status indicator - fixed position, always present (empty space when running)
 	var status string
-	if !isRunning {
+	if m.transitioning {
+		// Pulsating countdown in the status line
+		pulse := m.transitionTicks%2 == 0
+		if pulse {
+			status = transitionPulseStyle.Render(fmt.Sprintf("Starting in %ds", m.transitionTicks))
+		} else {
+			status = transitionDimStyle.Render(fmt.Sprintf("Starting in %ds", m.transitionTicks))
+		}
+	} else if !isRunning {
 		status = subtitleStyle.Render("PAUSED")
-	}
-
-	help := helpStyle.Render("[space] start/pause  [r] reset  [n] skip  [esc] back  [q] quit")
-
-	elements := []string{workflowName, stepLabel, "", timerDisplay, progressDisplay, stepProgress}
-	if status != "" {
-		elements = append(elements, status)
-	}
-	elements = append(elements, help)
-
-	return containerStyle.Render(
-		lipgloss.JoinVertical(lipgloss.Center, elements...),
-	)
-}
-
-func (m Model) viewTransition() string {
-	// Workflow name
-	workflowName := subtitleStyle.Render(m.session.Workflow.Name)
-
-	// Step label with transition color (pulsating effect based on tick count)
-	stepLabel := transitionLabelStyle.Render(m.session.CurrentStepName())
-
-	// Pulsating countdown display - text flashes between bright and dim
-	var countdownText string
-	pulse := m.transitionTicks%2 == 0
-	if pulse {
-		countdownText = transitionPulseStyle.Render(fmt.Sprintf("Starting in %ds", m.transitionTicks))
 	} else {
-		countdownText = transitionDimStyle.Render(fmt.Sprintf("Starting in %ds", m.transitionTicks))
+		// Empty placeholder to maintain consistent layout
+		status = subtitleStyle.Render(" ")
 	}
 
-	// Large timer showing next stage duration
-	remaining := m.session.Timer.Remaining
-	minutes := int(remaining.Minutes())
-	seconds := int(remaining.Seconds()) % 60
-	timeStr := fmt.Sprintf("%02d:%02d", minutes, seconds)
-	largeTime := renderLargeTime(timeStr)
-	timerDisplay := timerPausedLargeStyle.Render(largeTime)
+	// Help text
+	var help string
+	if m.transitioning {
+		help = helpStyle.Render("[space] start now  [r] reset  [n] skip  [esc] back  [q] quit")
+	} else {
+		help = helpStyle.Render("[space] start/pause  [r] reset  [n] skip  [esc] back  [q] quit")
+	}
 
-	// Progress bar (empty for new stage)
-	progressDisplay := progressContainerStyle.Render(m.progressBar.ViewAs(0))
-
-	// Step progress
-	current, total := m.session.StepProgress()
-	stepProgress := sessionStyle.Render(fmt.Sprintf("Step %d/%d", current, total))
-
-	// Transition status
-	status := transitionStyle.Render("NEXT STAGE")
-
-	help := helpStyle.Render("[space] start now  [r] reset  [n] skip  [esc] back  [q] quit")
-
-	elements := []string{workflowName, stepLabel, "", timerDisplay, progressDisplay, stepProgress, countdownText, status, help}
+	elements := []string{workflowName, stepLabel, "", timerDisplay, progressDisplay, stepProgress, status, help}
 
 	return containerStyle.Render(
 		lipgloss.JoinVertical(lipgloss.Center, elements...),
