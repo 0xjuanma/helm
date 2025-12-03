@@ -66,7 +66,11 @@ var (
 
 	completeStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(accent)
+			Foreground(teal)
+
+	completeTimerStyle = lipgloss.NewStyle().
+				Bold(true).
+				Foreground(white)
 
 	containerStyle = lipgloss.NewStyle().
 			Align(lipgloss.Center).

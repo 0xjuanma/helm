@@ -6,6 +6,7 @@
 - Add auto-transition feature for all workflows
 
 ### Changed
+- Update styling and colours
 
 ### Fixed
 

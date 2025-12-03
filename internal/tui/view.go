@@ -155,7 +155,7 @@ func (m Model) viewComplete() string {
 	help := helpStyle.Render("[r] restart  [enter] back to menu  [q] quit")
 
 	return containerStyle.Render(
-		lipgloss.JoinVertical(lipgloss.Center, title, "", completeStyle.Render(checkmark), fullBar, message, "", help),
+		lipgloss.JoinVertical(lipgloss.Center, title, "", completeTimerStyle.Render(checkmark), fullBar, message, "", help),
 	)
 }
 
