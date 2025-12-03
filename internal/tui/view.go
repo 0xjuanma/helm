@@ -97,15 +97,15 @@ func (m Model) viewTimer() string {
 		timerDisplay = timerPausedLargeStyle.Render(largeTime)
 	}
 
-	// Progress bar
+	// Progress bar - uses animated value from SetPercent()
 	var progressDisplay string
-	if m.transitioning {
-		progressDisplay = progressContainerStyle.Render(m.progressBar.ViewAs(0))
-	} else if isRunning {
-		progressDisplay = progressContainerStyle.Render(m.progressBar.ViewAs(m.progress()))
-	} else {
+	if !isRunning && !m.transitioning {
+		// Show paused style when not running
 		pausedBar := newPausedProgressBar()
 		progressDisplay = progressContainerStyle.Render(pausedBar.ViewAs(m.progress()))
+	} else {
+		// Use the animated progress bar
+		progressDisplay = progressContainerStyle.Render(m.progressBar.View())
 	}
 
 	// Step progress

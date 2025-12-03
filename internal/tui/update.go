@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 
+	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/0xjuanma/helm/internal/timer"
@@ -18,6 +19,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case tickMsg:
 		return m.handleTick()
+	case progress.FrameMsg:
+		// Handle progress bar animation frames
+		progressModel, cmd := m.progressBar.Update(msg)
+		m.progressBar = progressModel.(progress.Model)
+		return m, cmd
 	}
 	return m, nil
 }
@@ -162,7 +168,9 @@ func (m Model) handleTick() (tea.Model, tea.Cmd) {
 			m.transitioning = false
 			m.session.Timer.Start()
 		}
-		return m, tea.Batch(tickCmd(), m.updateTitle())
+		// Animate progress bar to 0 during transition
+		progressCmd := m.progressBar.SetPercent(0)
+		return m, tea.Batch(tickCmd(), m.updateTitle(), progressCmd)
 	}
 
 	// Normal tick handling
@@ -170,19 +178,27 @@ func (m Model) handleTick() (tea.Model, tea.Cmd) {
 		m.session.NextStep()
 		if m.session.Completed {
 			m.screen = screenComplete
-			return m, tea.Batch(setTitle("Helm - Complete"), bell())
+			// Animate to full on completion
+			progressCmd := m.progressBar.SetPercent(1.0)
+			return m, tea.Batch(setTitle("Helm - Complete"), bell(), progressCmd)
 		}
 		// Check if auto-transition is enabled for this workflow
 		if m.session.Workflow.AutoTransition {
 			// Enter transition mode with configured delay
 			m.transitioning = true
 			m.transitionTicks = m.cfg.GetTransitionDelay()
-			return m, tea.Batch(tickCmd(), m.updateTitle(), bell())
+			// Animate progress bar to 0 for new stage
+			progressCmd := m.progressBar.SetPercent(0)
+			return m, tea.Batch(tickCmd(), m.updateTitle(), bell(), progressCmd)
 		}
 		// Manual transition - timer stays stopped, user presses spacebar
-		return m, tea.Batch(tickCmd(), m.updateTitle(), bell())
+		progressCmd := m.progressBar.SetPercent(0)
+		return m, tea.Batch(tickCmd(), m.updateTitle(), bell(), progressCmd)
 	}
-	return m, tea.Batch(tickCmd(), m.updateTitle())
+
+	// Update progress bar with smooth animation
+	progressCmd := m.progressBar.SetPercent(m.progress())
+	return m, tea.Batch(tickCmd(), m.updateTitle(), progressCmd)
 }
 
 func (m Model) startWorkflow(idx int) *timer.Session {
