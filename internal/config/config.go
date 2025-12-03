@@ -18,15 +18,15 @@ type StepConfig struct {
 }
 
 type WorkflowConfig struct {
-	Name  string       `json:"name"`
-	Steps []StepConfig `json:"steps"`
-	Loop  bool         `json:"loop"`
+	Name           string       `json:"name"`
+	Steps          []StepConfig `json:"steps"`
+	Loop           bool         `json:"loop"`
+	AutoTransition bool         `json:"auto_transition"`
 }
 
 type Config struct {
 	Design             *WorkflowConfig `json:"design,omitempty"`
 	Custom             *WorkflowConfig `json:"custom,omitempty"`
-	AutoTransition     bool            `json:"auto_transition"`      // Enable auto-transition between stages
 	TransitionDelaySec int             `json:"transition_delay_sec"` // Delay in seconds before next stage starts (1-10)
 }
 
@@ -39,8 +39,9 @@ const (
 func DefaultConfig() *Config {
 	return &Config{
 		Design: &WorkflowConfig{
-			Name: "Design Interview",
-			Loop: false,
+			Name:           "Design Interview",
+			Loop:           false,
+			AutoTransition: true,
 			Steps: []StepConfig{
 				{Name: "REQUIREMENTS", Minutes: 5},
 				{Name: "ENTITIES & API", Minutes: 7},
@@ -49,7 +50,6 @@ func DefaultConfig() *Config {
 			},
 		},
 		Custom:             nil,
-		AutoTransition:     true,
 		TransitionDelaySec: DefaultTransitionDelay,
 	}
 }
@@ -97,9 +97,10 @@ func (wc *WorkflowConfig) ToWorkflow() workflow.Workflow {
 		}
 	}
 	return workflow.Workflow{
-		Name:  wc.Name,
-		Steps: steps,
-		Loop:  wc.Loop,
+		Name:           wc.Name,
+		Steps:          steps,
+		Loop:           wc.Loop,
+		AutoTransition: wc.AutoTransition,
 	}
 }
 
@@ -112,9 +113,10 @@ func FromWorkflow(w *workflow.Workflow) *WorkflowConfig {
 		}
 	}
 	return &WorkflowConfig{
-		Name:  w.Name,
-		Steps: steps,
-		Loop:  w.Loop,
+		Name:           w.Name,
+		Steps:          steps,
+		Loop:           w.Loop,
+		AutoTransition: w.AutoTransition,
 	}
 }
 

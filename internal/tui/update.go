@@ -118,8 +118,8 @@ func (m Model) handleTransitionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.screen = screenComplete
 			return m, tea.Batch(setTitle("Helm - Complete"), bell())
 		}
-		// Enter new transition if auto-transition enabled
-		if m.cfg.AutoTransition {
+		// Enter new transition if auto-transition enabled for this workflow
+		if m.session.Workflow.AutoTransition {
 			m.transitioning = true
 			m.transitionTicks = m.cfg.GetTransitionDelay()
 		}
@@ -172,8 +172,8 @@ func (m Model) handleTick() (tea.Model, tea.Cmd) {
 			m.screen = screenComplete
 			return m, tea.Batch(setTitle("Helm - Complete"), bell())
 		}
-		// Check if auto-transition is enabled
-		if m.cfg.AutoTransition {
+		// Check if auto-transition is enabled for this workflow
+		if m.session.Workflow.AutoTransition {
 			// Enter transition mode with configured delay
 			m.transitioning = true
 			m.transitionTicks = m.cfg.GetTransitionDelay()

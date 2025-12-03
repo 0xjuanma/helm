@@ -8,9 +8,10 @@ type Step struct {
 }
 
 type Workflow struct {
-	Name  string
-	Steps []Step
-	Loop  bool
+	Name           string
+	Steps          []Step
+	Loop           bool
+	AutoTransition bool
 }
 
 func (w *Workflow) StepCount() int {
