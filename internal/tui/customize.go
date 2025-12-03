@@ -75,7 +75,6 @@ func (m *Model) initDraft() {
 		}
 	}
 
-	// Deep copy
 	draft := &config.WorkflowConfig{
 		Name:           wc.Name,
 		Steps:          make([]config.StepConfig, len(wc.Steps)),
@@ -124,22 +123,17 @@ func (m Model) handleEditSelect() (tea.Model, tea.Cmd) {
 
 	switch {
 	case m.cursor == 0:
-		// Edit name
 		m.edit.field = fieldWorkflowName
 		m.edit.input = m.edit.draft.Name
 	case m.cursor == 1:
-		// Toggle loop
 		m.edit.draft.Loop = !m.edit.draft.Loop
 	case m.cursor == 2:
-		// Toggle auto-transition
 		m.edit.draft.AutoTransition = !m.edit.draft.AutoTransition
 	case m.cursor >= 3 && m.cursor < 3+stepCount:
-		// Edit step
 		m.edit.stepIdx = m.cursor - 3
 		m.edit.field = fieldStepName
 		m.edit.input = m.edit.draft.Steps[m.edit.stepIdx].Name
 	case m.cursor == 3+stepCount:
-		// Add step
 		if stepCount < config.MaxSteps {
 			m.edit.draft.Steps = append(m.edit.draft.Steps, config.StepConfig{
 				Name:    fmt.Sprintf("STEP %d", stepCount+1),
@@ -147,10 +141,8 @@ func (m Model) handleEditSelect() (tea.Model, tea.Cmd) {
 			})
 		}
 	case m.cursor == 4+stepCount:
-		// Save
 		return m.saveWorkflow()
 	case m.cursor == 5+stepCount:
-		// Cancel
 		m.screen = screenCustomize
 		m.edit = nil
 		m.cursor = 0
@@ -282,7 +274,6 @@ func (m Model) viewEdit() string {
 
 	var lines []string
 
-	// Workflow name
 	nameLabel := "Name: "
 	nameValue := m.edit.draft.Name
 	if m.edit.field == fieldWorkflowName {
@@ -290,21 +281,18 @@ func (m Model) viewEdit() string {
 	}
 	lines = append(lines, m.formatEditLine(0, nameLabel+nameValue))
 
-	// Loop toggle
 	loopValue := "No"
 	if m.edit.draft.Loop {
 		loopValue = "Yes"
 	}
 	lines = append(lines, m.formatEditLine(1, fmt.Sprintf("Loop: %s", loopValue)))
 
-	// Auto-transition toggle
 	autoTransValue := "No"
 	if m.edit.draft.AutoTransition {
 		autoTransValue = "Yes"
 	}
 	lines = append(lines, m.formatEditLine(2, fmt.Sprintf("Auto-Transition: %s", autoTransValue)))
 
-	// Steps
 	for i, step := range m.edit.draft.Steps {
 		stepLine := fmt.Sprintf("  %s (%dm)", step.Name, step.Minutes)
 		if m.edit.field == fieldStepName && m.edit.stepIdx == i {
@@ -315,7 +303,6 @@ func (m Model) viewEdit() string {
 		lines = append(lines, m.formatEditLine(3+i, stepLine))
 	}
 
-	// Add step
 	addIdx := 3 + len(m.edit.draft.Steps)
 	addLabel := "+ Add Step"
 	if len(m.edit.draft.Steps) >= config.MaxSteps {
@@ -323,7 +310,6 @@ func (m Model) viewEdit() string {
 	}
 	lines = append(lines, m.formatEditLine(addIdx, addLabel))
 
-	// Save / Cancel
 	lines = append(lines, "")
 	lines = append(lines, m.formatEditLine(addIdx+1, "Save"))
 	lines = append(lines, m.formatEditLine(addIdx+2, "Cancel"))

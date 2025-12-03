@@ -21,10 +21,9 @@ var (
 	subtitleStyle = lipgloss.NewStyle().
 			Foreground(subtle)
 
-	// Large timer display using ASCII art-style numbers
 	timerLargeStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(highlight). // Steel blue accent
+			Foreground(highlight).
 			MarginTop(1).
 			MarginBottom(1)
 
@@ -79,7 +78,6 @@ var (
 				MarginTop(1).
 				MarginBottom(1)
 
-	// Transition styles for auto-transition between stages
 	transitionStyle = lipgloss.NewStyle().
 			Foreground(gold).
 			Bold(true)

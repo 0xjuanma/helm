@@ -35,8 +35,8 @@ type Model struct {
 	edit            *editState
 	width           int
 	height          int
-	transitioning   bool // Are we in transition between stages?
-	transitionTicks int  // Countdown ticks remaining (3 seconds = 3 ticks)
+	transitioning   bool
+	transitionTicks int
 }
 
 func NewModel() Model {
