@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 
+	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/0xjuanma/helm/internal/timer"
@@ -18,6 +19,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case tickMsg:
 		return m.handleTick()
+	case progress.FrameMsg:
+		// Handle progress bar animation frames
+		progressModel, cmd := m.progressBar.Update(msg)
+		m.progressBar = progressModel.(progress.Model)
+		return m, cmd
 	}
 	return m, nil
 }
@@ -67,6 +73,11 @@ func (m Model) handleSelectKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) handleTimerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	// Handle input during transition phase
+	if m.transitioning {
+		return m.handleTransitionKey(msg)
+	}
+
 	switch msg.String() {
 	case "q", "ctrl+c":
 		return m, tea.Sequence(setTitle(""), tea.Quit)
@@ -84,6 +95,43 @@ func (m Model) handleTimerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 		return m, tea.Batch(m.updateTitle(), bell())
 	case "esc":
+		m.screen = screenSelect
+		m.session = nil
+		return m, setTitle("Helm")
+	}
+	return m, nil
+}
+
+func (m Model) handleTransitionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "q", "ctrl+c":
+		return m, tea.Sequence(setTitle(""), tea.Quit)
+	case " ":
+		// Skip transition countdown, start immediately
+		m.transitioning = false
+		m.session.Timer.Start()
+		return m, m.updateTitle()
+	case "r":
+		// Cancel transition, reset current stage timer
+		m.transitioning = false
+		m.session.Timer.Reset()
+		return m, m.updateTitle()
+	case "n":
+		// Skip to next stage (after the pending one)
+		m.transitioning = false
+		m.session.NextStep()
+		if m.session.Completed {
+			m.screen = screenComplete
+			return m, tea.Batch(setTitle("Helm - Complete"), bell())
+		}
+		// Enter new transition if auto-transition enabled for this workflow
+		if m.session.Workflow.AutoTransition {
+			m.transitioning = true
+			m.transitionTicks = m.cfg.GetTransitionDelay()
+		}
+		return m, tea.Batch(m.updateTitle(), bell())
+	case "esc":
+		m.transitioning = false
 		m.screen = screenSelect
 		m.session = nil
 		return m, setTitle("Helm")
@@ -111,15 +159,46 @@ func (m Model) handleTick() (tea.Model, tea.Cmd) {
 	if m.screen != screenTimer || m.session == nil {
 		return m, nil
 	}
+
+	// Handle transition countdown
+	if m.transitioning {
+		m.transitionTicks--
+		if m.transitionTicks <= 0 {
+			// Transition complete - start next stage
+			m.transitioning = false
+			m.session.Timer.Start()
+		}
+		// Animate progress bar to 0 during transition
+		progressCmd := m.progressBar.SetPercent(0)
+		return m, tea.Batch(tickCmd(), m.updateTitle(), progressCmd)
+	}
+
+	// Normal tick handling
 	if m.session.Timer.Tick(tickInterval) {
 		m.session.NextStep()
 		if m.session.Completed {
 			m.screen = screenComplete
-			return m, tea.Batch(setTitle("Helm - Complete"), bell())
+			// Animate to full on completion
+			progressCmd := m.progressBar.SetPercent(1.0)
+			return m, tea.Batch(setTitle("Helm - Complete"), bell(), progressCmd)
 		}
-		return m, tea.Batch(tickCmd(), m.updateTitle(), bell())
+		// Check if auto-transition is enabled for this workflow
+		if m.session.Workflow.AutoTransition {
+			// Enter transition mode with configured delay
+			m.transitioning = true
+			m.transitionTicks = m.cfg.GetTransitionDelay()
+			// Animate progress bar to 0 for new stage
+			progressCmd := m.progressBar.SetPercent(0)
+			return m, tea.Batch(tickCmd(), m.updateTitle(), bell(), progressCmd)
+		}
+		// Manual transition - timer stays stopped, user presses spacebar
+		progressCmd := m.progressBar.SetPercent(0)
+		return m, tea.Batch(tickCmd(), m.updateTitle(), bell(), progressCmd)
 	}
-	return m, tea.Batch(tickCmd(), m.updateTitle())
+
+	// Update progress bar with smooth animation
+	progressCmd := m.progressBar.SetPercent(m.progress())
+	return m, tea.Batch(tickCmd(), m.updateTitle(), progressCmd)
 }
 
 func (m Model) startWorkflow(idx int) *timer.Session {

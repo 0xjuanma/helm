@@ -68,17 +68,19 @@ func (m *Model) initDraft() {
 
 	if wc == nil {
 		wc = &config.WorkflowConfig{
-			Name:  "Custom",
-			Steps: []config.StepConfig{{Name: "STEP 1", Minutes: 10}},
-			Loop:  false,
+			Name:           "Custom",
+			Steps:          []config.StepConfig{{Name: "STEP 1", Minutes: 10}},
+			Loop:           false,
+			AutoTransition: true,
 		}
 	}
 
 	// Deep copy
 	draft := &config.WorkflowConfig{
-		Name:  wc.Name,
-		Steps: make([]config.StepConfig, len(wc.Steps)),
-		Loop:  wc.Loop,
+		Name:           wc.Name,
+		Steps:          make([]config.StepConfig, len(wc.Steps)),
+		Loop:           wc.Loop,
+		AutoTransition: wc.AutoTransition,
 	}
 	copy(draft.Steps, wc.Steps)
 	m.edit.draft = draft
@@ -90,8 +92,8 @@ func (m Model) updateEdit(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 
 	stepCount := len(m.edit.draft.Steps)
-	// Menu: Name, Loop, [Steps...], Add Step, Save, Cancel
-	menuSize := 3 + stepCount + 1
+	// Menu: Name, Loop, Auto-Transition, [Steps...], Add Step, Save, Cancel
+	menuSize := 4 + stepCount + 1
 
 	switch msg.String() {
 	case "q", "ctrl+c":
@@ -128,12 +130,15 @@ func (m Model) handleEditSelect() (tea.Model, tea.Cmd) {
 	case m.cursor == 1:
 		// Toggle loop
 		m.edit.draft.Loop = !m.edit.draft.Loop
-	case m.cursor >= 2 && m.cursor < 2+stepCount:
+	case m.cursor == 2:
+		// Toggle auto-transition
+		m.edit.draft.AutoTransition = !m.edit.draft.AutoTransition
+	case m.cursor >= 3 && m.cursor < 3+stepCount:
 		// Edit step
-		m.edit.stepIdx = m.cursor - 2
+		m.edit.stepIdx = m.cursor - 3
 		m.edit.field = fieldStepName
 		m.edit.input = m.edit.draft.Steps[m.edit.stepIdx].Name
-	case m.cursor == 2+stepCount:
+	case m.cursor == 3+stepCount:
 		// Add step
 		if stepCount < config.MaxSteps {
 			m.edit.draft.Steps = append(m.edit.draft.Steps, config.StepConfig{
@@ -141,10 +146,10 @@ func (m Model) handleEditSelect() (tea.Model, tea.Cmd) {
 				Minutes: 10,
 			})
 		}
-	case m.cursor == 3+stepCount:
+	case m.cursor == 4+stepCount:
 		// Save
 		return m.saveWorkflow()
-	case m.cursor == 4+stepCount:
+	case m.cursor == 5+stepCount:
 		// Cancel
 		m.screen = screenCustomize
 		m.edit = nil
@@ -155,10 +160,10 @@ func (m Model) handleEditSelect() (tea.Model, tea.Cmd) {
 
 func (m Model) handleDeleteStep() (tea.Model, tea.Cmd) {
 	stepCount := len(m.edit.draft.Steps)
-	if m.cursor >= 2 && m.cursor < 2+stepCount && stepCount > 1 {
-		idx := m.cursor - 2
+	if m.cursor >= 3 && m.cursor < 3+stepCount && stepCount > 1 {
+		idx := m.cursor - 3
 		m.edit.draft.Steps = append(m.edit.draft.Steps[:idx], m.edit.draft.Steps[idx+1:]...)
-		if m.cursor >= 2+len(m.edit.draft.Steps) {
+		if m.cursor >= 3+len(m.edit.draft.Steps) {
 			m.cursor--
 		}
 	}
@@ -292,6 +297,13 @@ func (m Model) viewEdit() string {
 	}
 	lines = append(lines, m.formatEditLine(1, fmt.Sprintf("Loop: %s", loopValue)))
 
+	// Auto-transition toggle
+	autoTransValue := "No"
+	if m.edit.draft.AutoTransition {
+		autoTransValue = "Yes"
+	}
+	lines = append(lines, m.formatEditLine(2, fmt.Sprintf("Auto-Transition: %s", autoTransValue)))
+
 	// Steps
 	for i, step := range m.edit.draft.Steps {
 		stepLine := fmt.Sprintf("  %s (%dm)", step.Name, step.Minutes)
@@ -300,11 +312,11 @@ func (m Model) viewEdit() string {
 		} else if m.edit.field == fieldStepDuration && m.edit.stepIdx == i {
 			stepLine = fmt.Sprintf("  Duration: %s_ min", m.edit.input)
 		}
-		lines = append(lines, m.formatEditLine(2+i, stepLine))
+		lines = append(lines, m.formatEditLine(3+i, stepLine))
 	}
 
 	// Add step
-	addIdx := 2 + len(m.edit.draft.Steps)
+	addIdx := 3 + len(m.edit.draft.Steps)
 	addLabel := "+ Add Step"
 	if len(m.edit.draft.Steps) >= config.MaxSteps {
 		addLabel = "(max steps reached)"

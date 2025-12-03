@@ -18,21 +18,30 @@ type StepConfig struct {
 }
 
 type WorkflowConfig struct {
-	Name  string       `json:"name"`
-	Steps []StepConfig `json:"steps"`
-	Loop  bool         `json:"loop"`
+	Name           string       `json:"name"`
+	Steps          []StepConfig `json:"steps"`
+	Loop           bool         `json:"loop"`
+	AutoTransition bool         `json:"auto_transition"`
 }
 
 type Config struct {
-	Design *WorkflowConfig `json:"design,omitempty"`
-	Custom *WorkflowConfig `json:"custom,omitempty"`
+	Design             *WorkflowConfig `json:"design,omitempty"`
+	Custom             *WorkflowConfig `json:"custom,omitempty"`
+	TransitionDelaySec int             `json:"transition_delay_sec"` // Delay in seconds before next stage starts (1-10)
 }
+
+const (
+	DefaultTransitionDelay = 3
+	MinTransitionDelay     = 1
+	MaxTransitionDelay     = 10
+)
 
 func DefaultConfig() *Config {
 	return &Config{
 		Design: &WorkflowConfig{
-			Name: "Design Interview",
-			Loop: false,
+			Name:           "Design Interview",
+			Loop:           false,
+			AutoTransition: true,
 			Steps: []StepConfig{
 				{Name: "REQUIREMENTS", Minutes: 5},
 				{Name: "ENTITIES & API", Minutes: 7},
@@ -40,8 +49,20 @@ func DefaultConfig() *Config {
 				{Name: "DEEP-DIVE", Minutes: 10},
 			},
 		},
-		Custom: nil,
+		Custom:             nil,
+		TransitionDelaySec: DefaultTransitionDelay,
 	}
+}
+
+// GetTransitionDelay returns the transition delay, clamped to valid range
+func (cfg *Config) GetTransitionDelay() int {
+	if cfg.TransitionDelaySec < MinTransitionDelay {
+		return DefaultTransitionDelay
+	}
+	if cfg.TransitionDelaySec > MaxTransitionDelay {
+		return MaxTransitionDelay
+	}
+	return cfg.TransitionDelaySec
 }
 
 func (cfg *Config) BuildWorkflows() []workflow.Workflow {
@@ -61,7 +82,7 @@ func (cfg *Config) BuildWorkflows() []workflow.Workflow {
 	if cfg.Custom != nil {
 		workflows[2] = cfg.Custom.ToWorkflow()
 	} else {
-		workflows[2] = workflow.Workflow{Name: "Empty - press [c] to customize"}
+		workflows[2] = workflow.Workflow{Name: "Empty - press [c] to customize", AutoTransition: true}
 	}
 
 	return workflows
@@ -76,9 +97,10 @@ func (wc *WorkflowConfig) ToWorkflow() workflow.Workflow {
 		}
 	}
 	return workflow.Workflow{
-		Name:  wc.Name,
-		Steps: steps,
-		Loop:  wc.Loop,
+		Name:           wc.Name,
+		Steps:          steps,
+		Loop:           wc.Loop,
+		AutoTransition: wc.AutoTransition,
 	}
 }
 
@@ -91,9 +113,10 @@ func FromWorkflow(w *workflow.Workflow) *WorkflowConfig {
 		}
 	}
 	return &WorkflowConfig{
-		Name:  w.Name,
-		Steps: steps,
-		Loop:  w.Loop,
+		Name:           w.Name,
+		Steps:          steps,
+		Loop:           w.Loop,
+		AutoTransition: w.AutoTransition,
 	}
 }
 
