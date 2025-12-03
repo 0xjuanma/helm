@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [0.4.0] - 2025-12-02
+
+### Added
 - Add auto-transition feature for all workflows
 
 ### Changed
