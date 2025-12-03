@@ -130,9 +130,14 @@ func (m Model) handleTick() (tea.Model, tea.Cmd) {
 			m.screen = screenComplete
 			return m, tea.Batch(setTitle("Helm - Complete"), bell())
 		}
-		// Enter transition mode with 3 second delay
-		m.transitioning = true
-		m.transitionTicks = 3
+		// Check if auto-transition is enabled
+		if m.cfg.AutoTransition {
+			// Enter transition mode with configured delay
+			m.transitioning = true
+			m.transitionTicks = m.cfg.GetTransitionDelay()
+			return m, tea.Batch(tickCmd(), m.updateTitle(), bell())
+		}
+		// Manual transition - timer stays stopped, user presses spacebar
 		return m, tea.Batch(tickCmd(), m.updateTitle(), bell())
 	}
 	return m, tea.Batch(tickCmd(), m.updateTitle())

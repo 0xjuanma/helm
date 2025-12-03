@@ -24,9 +24,17 @@ type WorkflowConfig struct {
 }
 
 type Config struct {
-	Design *WorkflowConfig `json:"design,omitempty"`
-	Custom *WorkflowConfig `json:"custom,omitempty"`
+	Design             *WorkflowConfig `json:"design,omitempty"`
+	Custom             *WorkflowConfig `json:"custom,omitempty"`
+	AutoTransition     bool            `json:"auto_transition"`      // Enable auto-transition between stages
+	TransitionDelaySec int             `json:"transition_delay_sec"` // Delay in seconds before next stage starts (1-10)
 }
+
+const (
+	DefaultTransitionDelay = 3
+	MinTransitionDelay     = 1
+	MaxTransitionDelay     = 10
+)
 
 func DefaultConfig() *Config {
 	return &Config{
@@ -40,8 +48,21 @@ func DefaultConfig() *Config {
 				{Name: "DEEP-DIVE", Minutes: 10},
 			},
 		},
-		Custom: nil,
+		Custom:             nil,
+		AutoTransition:     true,
+		TransitionDelaySec: DefaultTransitionDelay,
 	}
+}
+
+// GetTransitionDelay returns the transition delay, clamped to valid range
+func (cfg *Config) GetTransitionDelay() int {
+	if cfg.TransitionDelaySec < MinTransitionDelay {
+		return DefaultTransitionDelay
+	}
+	if cfg.TransitionDelaySec > MaxTransitionDelay {
+		return MaxTransitionDelay
+	}
+	return cfg.TransitionDelaySec
 }
 
 func (cfg *Config) BuildWorkflows() []workflow.Workflow {
