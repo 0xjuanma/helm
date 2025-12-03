@@ -81,8 +81,12 @@ var (
 			Bold(true)
 
 	transitionPulseStyle = lipgloss.NewStyle().
-				Foreground(highlight).
+				Foreground(transition).
 				Bold(true)
+
+	transitionDimStyle = lipgloss.NewStyle().
+				Foreground(muted).
+				Bold(false)
 
 	transitionLabelStyle = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#FFFFFF")).

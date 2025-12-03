@@ -140,13 +140,13 @@ func (m Model) viewTransition() string {
 	// Step label with transition color (pulsating effect based on tick count)
 	stepLabel := transitionLabelStyle.Render(m.session.CurrentStepName())
 
-	// Pulsating countdown display
+	// Pulsating countdown display - text flashes between bright and dim
 	var countdownText string
 	pulse := m.transitionTicks%2 == 0
 	if pulse {
-		countdownText = transitionPulseStyle.Render(fmt.Sprintf("● ● ● Starting in %ds ● ● ●", m.transitionTicks))
+		countdownText = transitionPulseStyle.Render(fmt.Sprintf("Starting in %ds", m.transitionTicks))
 	} else {
-		countdownText = transitionStyle.Render(fmt.Sprintf("○ ○ ○ Starting in %ds ○ ○ ○", m.transitionTicks))
+		countdownText = transitionDimStyle.Render(fmt.Sprintf("Starting in %ds", m.transitionTicks))
 	}
 
 	// Large timer showing next stage duration
