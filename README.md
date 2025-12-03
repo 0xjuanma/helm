@@ -10,7 +10,6 @@
 [![GitHub Release](https://img.shields.io/github/v/release/0xjuanma/helm)](https://github.com/0xjuanma/helm/releases/latest)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
 
-
 A minimalistic TUI Pomodoro-like timer designed for pure focus. Protect your focus and time.
 </div>
 
@@ -37,7 +36,7 @@ go build
 
 ## Usage
 
-Run `helm` to launch the timer interface.
+Run `helm` to launch the timer interface. You can configure your own workflows.
 
 ### Controls
 
@@ -58,6 +57,6 @@ Run `helm` to launch the timer interface.
 - **Design Interview** - Structured interview practice (customizable)
 - **Custom** - Create your own workflow
 
-Settings are stored in `~/.helm/settings.json`.
+Settings are stored in `~/.helm/settings.json`. Press `c` to customize workflows.
 
 **Author:** [@0xjuanma](https://github.com/0xjuanma)
