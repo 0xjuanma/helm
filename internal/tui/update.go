@@ -67,6 +67,11 @@ func (m Model) handleSelectKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) handleTimerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	// Handle input during transition phase
+	if m.transitioning {
+		return m.handleTransitionKey(msg)
+	}
+
 	switch msg.String() {
 	case "q", "ctrl+c":
 		return m, tea.Sequence(setTitle(""), tea.Quit)
@@ -84,6 +89,43 @@ func (m Model) handleTimerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 		return m, tea.Batch(m.updateTitle(), bell())
 	case "esc":
+		m.screen = screenSelect
+		m.session = nil
+		return m, setTitle("Helm")
+	}
+	return m, nil
+}
+
+func (m Model) handleTransitionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "q", "ctrl+c":
+		return m, tea.Sequence(setTitle(""), tea.Quit)
+	case " ":
+		// Skip transition countdown, start immediately
+		m.transitioning = false
+		m.session.Timer.Start()
+		return m, m.updateTitle()
+	case "r":
+		// Cancel transition, reset current stage timer
+		m.transitioning = false
+		m.session.Timer.Reset()
+		return m, m.updateTitle()
+	case "n":
+		// Skip to next stage (after the pending one)
+		m.transitioning = false
+		m.session.NextStep()
+		if m.session.Completed {
+			m.screen = screenComplete
+			return m, tea.Batch(setTitle("Helm - Complete"), bell())
+		}
+		// Enter new transition if auto-transition enabled
+		if m.cfg.AutoTransition {
+			m.transitioning = true
+			m.transitionTicks = m.cfg.GetTransitionDelay()
+		}
+		return m, tea.Batch(m.updateTitle(), bell())
+	case "esc":
+		m.transitioning = false
 		m.screen = screenSelect
 		m.session = nil
 		return m, setTitle("Helm")
