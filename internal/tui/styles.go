@@ -11,7 +11,6 @@ var (
 	subtle    = lipgloss.AdaptiveColor{Light: "#666666", Dark: "#888888"}
 	highlight = lipgloss.AdaptiveColor{Light: "#4A6B8A", Dark: "#6B8BA4"} // Steel blue (from helm logo)
 	gold      = lipgloss.AdaptiveColor{Light: "#C7920A", Dark: "#F9A825"} // Gold (from helm logo)
-	accent    = lipgloss.AdaptiveColor{Light: "#2E7D32", Dark: "#81C784"}
 	muted     = lipgloss.AdaptiveColor{Light: "#AAAAAA", Dark: "#555555"}
 	white     = lipgloss.AdaptiveColor{Light: "#333333", Dark: "#FFFFFF"}
 
