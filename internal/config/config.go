@@ -82,7 +82,7 @@ func (cfg *Config) BuildWorkflows() []workflow.Workflow {
 	if cfg.Custom != nil {
 		workflows[2] = cfg.Custom.ToWorkflow()
 	} else {
-		workflows[2] = workflow.Workflow{Name: "Empty - press [c] to customize"}
+		workflows[2] = workflow.Workflow{Name: "Empty - press [c] to customize", AutoTransition: true}
 	}
 
 	return workflows
