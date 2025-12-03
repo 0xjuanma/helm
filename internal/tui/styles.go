@@ -8,10 +8,11 @@ import (
 const progressWidth = 40
 
 var (
-	subtle    = lipgloss.AdaptiveColor{Light: "#666666", Dark: "#888888"}
-	highlight = lipgloss.AdaptiveColor{Light: "#C41E3A", Dark: "#FF6B6B"}
-	accent    = lipgloss.AdaptiveColor{Light: "#2E7D32", Dark: "#81C784"}
-	muted     = lipgloss.AdaptiveColor{Light: "#AAAAAA", Dark: "#555555"}
+	subtle     = lipgloss.AdaptiveColor{Light: "#666666", Dark: "#888888"}
+	highlight  = lipgloss.AdaptiveColor{Light: "#C41E3A", Dark: "#FF6B6B"}
+	accent     = lipgloss.AdaptiveColor{Light: "#2E7D32", Dark: "#81C784"}
+	muted      = lipgloss.AdaptiveColor{Light: "#AAAAAA", Dark: "#555555"}
+	transition = lipgloss.AdaptiveColor{Light: "#FF8C00", Dark: "#FFD700"} // Gold/Orange for transition
 
 	titleStyle = lipgloss.NewStyle().
 			Bold(true).
@@ -73,6 +74,21 @@ var (
 	progressContainerStyle = lipgloss.NewStyle().
 				MarginTop(1).
 				MarginBottom(1)
+
+	// Transition styles for auto-transition between stages
+	transitionStyle = lipgloss.NewStyle().
+			Foreground(transition).
+			Bold(true)
+
+	transitionPulseStyle = lipgloss.NewStyle().
+				Foreground(highlight).
+				Bold(true)
+
+	transitionLabelStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#FFFFFF")).
+				Background(transition).
+				Padding(0, 2).
+				Bold(true)
 )
 
 func newProgressBar() progress.Model {

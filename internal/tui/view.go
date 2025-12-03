@@ -70,6 +70,11 @@ func (m Model) viewSelect() string {
 func (m Model) viewTimer() string {
 	isRunning := m.session.Timer.State == timer.Running
 
+	// Handle transition view
+	if m.transitioning {
+		return m.viewTransition()
+	}
+
 	// Step label with colored background
 	var stepLabel string
 	if isRunning {
@@ -122,6 +127,49 @@ func (m Model) viewTimer() string {
 		elements = append(elements, status)
 	}
 	elements = append(elements, help)
+
+	return containerStyle.Render(
+		lipgloss.JoinVertical(lipgloss.Center, elements...),
+	)
+}
+
+func (m Model) viewTransition() string {
+	// Workflow name
+	workflowName := subtitleStyle.Render(m.session.Workflow.Name)
+
+	// Step label with transition color (pulsating effect based on tick count)
+	stepLabel := transitionLabelStyle.Render(m.session.CurrentStepName())
+
+	// Pulsating countdown display
+	var countdownText string
+	pulse := m.transitionTicks%2 == 0
+	if pulse {
+		countdownText = transitionPulseStyle.Render(fmt.Sprintf("● ● ● Starting in %ds ● ● ●", m.transitionTicks))
+	} else {
+		countdownText = transitionStyle.Render(fmt.Sprintf("○ ○ ○ Starting in %ds ○ ○ ○", m.transitionTicks))
+	}
+
+	// Large timer showing next stage duration
+	remaining := m.session.Timer.Remaining
+	minutes := int(remaining.Minutes())
+	seconds := int(remaining.Seconds()) % 60
+	timeStr := fmt.Sprintf("%02d:%02d", minutes, seconds)
+	largeTime := renderLargeTime(timeStr)
+	timerDisplay := timerPausedLargeStyle.Render(largeTime)
+
+	// Progress bar (empty for new stage)
+	progressDisplay := progressContainerStyle.Render(m.progressBar.ViewAs(0))
+
+	// Step progress
+	current, total := m.session.StepProgress()
+	stepProgress := sessionStyle.Render(fmt.Sprintf("Step %d/%d", current, total))
+
+	// Transition status
+	status := transitionStyle.Render("NEXT STAGE")
+
+	help := helpStyle.Render("[space] start now  [r] reset  [n] skip  [esc] back  [q] quit")
+
+	elements := []string{workflowName, stepLabel, "", timerDisplay, progressDisplay, stepProgress, countdownText, status, help}
 
 	return containerStyle.Render(
 		lipgloss.JoinVertical(lipgloss.Center, elements...),

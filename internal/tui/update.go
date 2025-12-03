@@ -111,12 +111,28 @@ func (m Model) handleTick() (tea.Model, tea.Cmd) {
 	if m.screen != screenTimer || m.session == nil {
 		return m, nil
 	}
+
+	// Handle transition countdown
+	if m.transitioning {
+		m.transitionTicks--
+		if m.transitionTicks <= 0 {
+			// Transition complete - start next stage
+			m.transitioning = false
+			m.session.Timer.Start()
+		}
+		return m, tea.Batch(tickCmd(), m.updateTitle())
+	}
+
+	// Normal tick handling
 	if m.session.Timer.Tick(tickInterval) {
 		m.session.NextStep()
 		if m.session.Completed {
 			m.screen = screenComplete
 			return m, tea.Batch(setTitle("Helm - Complete"), bell())
 		}
+		// Enter transition mode with 3 second delay
+		m.transitioning = true
+		m.transitionTicks = 3
 		return m, tea.Batch(tickCmd(), m.updateTitle(), bell())
 	}
 	return m, tea.Batch(tickCmd(), m.updateTitle())

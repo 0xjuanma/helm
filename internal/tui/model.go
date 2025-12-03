@@ -26,15 +26,17 @@ const (
 type tickMsg time.Time
 
 type Model struct {
-	screen      screen
-	workflows   []workflow.Workflow
-	cfg         *config.Config
-	cursor      int
-	session     *timer.Session
-	progressBar progress.Model
-	edit        *editState
-	width       int
-	height      int
+	screen          screen
+	workflows       []workflow.Workflow
+	cfg             *config.Config
+	cursor          int
+	session         *timer.Session
+	progressBar     progress.Model
+	edit            *editState
+	width           int
+	height          int
+	transitioning   bool // Are we in transition between stages?
+	transitionTicks int  // Countdown ticks remaining (3 seconds = 3 ticks)
 }
 
 func NewModel() Model {
