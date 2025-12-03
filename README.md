@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Report Card](https://goreportcard.com/badge/github.com/0xjuanma/helm)](https://goreportcard.com/report/github.com/0xjuanma/helm)
 [![GitHub Release](https://img.shields.io/github/v/release/0xjuanma/helm)](https://github.com/0xjuanma/helm/releases/latest)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/0xjuanma/helm/build.yml)](https://github.com/0xjuanma/helm/actions/workflows/build.yml)
 
 A minimalistic TUI Pomodoro-like timer designed for pure focus. Protect your focus and time.
 </div>
