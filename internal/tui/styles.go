@@ -8,12 +8,12 @@ import (
 const progressWidth = 40
 
 var (
-	subtle     = lipgloss.AdaptiveColor{Light: "#666666", Dark: "#888888"}
-	highlight  = lipgloss.AdaptiveColor{Light: "#C41E3A", Dark: "#FF6B6B"}
-	teal       = lipgloss.AdaptiveColor{Light: "#3BA99C", Dark: "#4ECDC4"}
-	accent     = lipgloss.AdaptiveColor{Light: "#2E7D32", Dark: "#81C784"}
-	muted      = lipgloss.AdaptiveColor{Light: "#AAAAAA", Dark: "#555555"}
-	white      = lipgloss.AdaptiveColor{Light: "#333333", Dark: "#FFFFFF"}
+	subtle    = lipgloss.AdaptiveColor{Light: "#666666", Dark: "#888888"}
+	highlight = lipgloss.AdaptiveColor{Light: "#C41E3A", Dark: "#FF6B6B"}
+	teal      = lipgloss.AdaptiveColor{Light: "#3BA99C", Dark: "#4ECDC4"}
+	accent    = lipgloss.AdaptiveColor{Light: "#2E7D32", Dark: "#81C784"}
+	muted     = lipgloss.AdaptiveColor{Light: "#AAAAAA", Dark: "#555555"}
+	white     = lipgloss.AdaptiveColor{Light: "#333333", Dark: "#FFFFFF"}
 
 	titleStyle = lipgloss.NewStyle().
 			Bold(true).
@@ -25,7 +25,7 @@ var (
 	// Large timer display using ASCII art-style numbers
 	timerLargeStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(white). // White for clean contrast in dual-tone
+			Foreground(highlight). // Red accent
 			MarginTop(1).
 			MarginBottom(1)
 
