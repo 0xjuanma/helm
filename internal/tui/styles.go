@@ -9,7 +9,7 @@ const progressWidth = 40
 
 var (
 	subtle    = lipgloss.AdaptiveColor{Light: "#666666", Dark: "#888888"}
-	highlight = lipgloss.AdaptiveColor{Light: "#4A6B8A", Dark: "#6B8BA4"} // Steel blue (from helm logo)
+	highlight = lipgloss.AdaptiveColor{Light: "#3D7A9E", Dark: "#7EB5D6"} // Steel blue (from helm logo)
 	gold      = lipgloss.AdaptiveColor{Light: "#C7920A", Dark: "#F9A825"} // Gold (from helm logo)
 	muted     = lipgloss.AdaptiveColor{Light: "#AAAAAA", Dark: "#555555"}
 	white     = lipgloss.AdaptiveColor{Light: "#333333", Dark: "#FFFFFF"}
@@ -101,7 +101,7 @@ var (
 
 func newProgressBar() progress.Model {
 	p := progress.New(
-		progress.WithGradient("#6B8BA4", "#F9A825"), // Steel → Gold gradient
+		progress.WithGradient("#7EB5D6", "#F9A825"), // Steel → Gold gradient
 		progress.WithWidth(progressWidth),
 		progress.WithoutPercentage(),
 	)
