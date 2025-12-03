@@ -97,13 +97,12 @@ var (
 
 func newProgressBar() progress.Model {
 	p := progress.New(
-		progress.WithDefaultGradient(),
+		progress.WithGradient("#4ECDC4", "#45B7AA"), // Teal gradient
 		progress.WithWidth(progressWidth),
 		progress.WithoutPercentage(),
 	)
 	p.Full = '█'
 	p.Empty = '░'
-	p.FullColor = string(highlight.Dark)
 	p.EmptyColor = string(muted.Dark)
 	return p
 }
