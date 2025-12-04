@@ -147,3 +147,16 @@ func TestNextStepOnCompletedSession(t *testing.T) {
 		t.Errorf("CurrentStep changed from %d to %d, should remain unchanged", prevStep, s.CurrentStep)
 	}
 }
+
+func TestNewSessionWithEmptyWorkflow(t *testing.T) {
+	w := &workflow.Workflow{
+		Name:  "Empty",
+		Steps: []workflow.Step{},
+	}
+
+	s := NewSession(w)
+
+	if s != nil {
+		t.Error("NewSession should return nil for empty workflow")
+	}
+}
