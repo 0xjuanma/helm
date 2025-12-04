@@ -33,6 +33,9 @@ func (s *Session) StepProgress() (current, total int) {
 }
 
 func (s *Session) NextStep() {
+	if s.Completed {
+		return
+	}
 	s.CurrentStep++
 	if s.CurrentStep >= s.Workflow.StepCount() {
 		if s.Workflow.Loop {
