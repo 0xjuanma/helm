@@ -70,10 +70,8 @@ func (m Model) viewSelect() string {
 func (m Model) viewTimer() string {
 	isRunning := m.session.Timer.State == timer.Running
 
-	// Workflow name
 	workflowName := subtitleStyle.Render(m.session.Workflow.Name)
 
-	// Step label with colored background
 	var stepLabel string
 	if m.transitioning {
 		stepLabel = transitionLabelStyle.Render(m.session.CurrentStepName())
@@ -83,7 +81,6 @@ func (m Model) viewTimer() string {
 		stepLabel = stepLabelPausedStyle.Render(m.session.CurrentStepName())
 	}
 
-	// Large timer display
 	remaining := m.session.Timer.Remaining
 	minutes := int(remaining.Minutes())
 	seconds := int(remaining.Seconds()) % 60
@@ -97,25 +94,19 @@ func (m Model) viewTimer() string {
 		timerDisplay = timerPausedLargeStyle.Render(largeTime)
 	}
 
-	// Progress bar - uses animated value from SetPercent()
 	var progressDisplay string
 	if !isRunning && !m.transitioning {
-		// Show paused style when not running
 		pausedBar := newPausedProgressBar()
 		progressDisplay = progressContainerStyle.Render(pausedBar.ViewAs(m.progress()))
 	} else {
-		// Use the animated progress bar
 		progressDisplay = progressContainerStyle.Render(m.progressBar.View())
 	}
 
-	// Step progress
 	current, total := m.session.StepProgress()
 	stepProgress := sessionStyle.Render(fmt.Sprintf("Step %d/%d", current, total))
 
-	// Status indicator - fixed position, always present (empty space when running)
 	var status string
 	if m.transitioning {
-		// Pulsating countdown in the status line
 		pulse := m.transitionTicks%2 == 0
 		if pulse {
 			status = transitionPulseStyle.Render(fmt.Sprintf("Starting in %ds", m.transitionTicks))
@@ -125,11 +116,9 @@ func (m Model) viewTimer() string {
 	} else if !isRunning {
 		status = subtitleStyle.Render("PAUSED")
 	} else {
-		// Empty placeholder to maintain consistent layout
-		status = subtitleStyle.Render(" ")
+		status = subtitleStyle.Render(" ") // layout placeholder
 	}
 
-	// Help text
 	var help string
 	if m.transitioning {
 		help = helpStyle.Render("[space] start now  [r] reset  [n] skip  [esc] back  [q] quit")
@@ -149,7 +138,6 @@ func (m Model) viewComplete() string {
 	title := completeStyle.Render("COMPLETE")
 	message := subtitleStyle.Render(fmt.Sprintf("%s finished", m.session.Workflow.Name))
 
-	// Full progress bar
 	fullBar := progressContainerStyle.Render(m.progressBar.ViewAs(1.0))
 
 	help := helpStyle.Render("[r] restart  [enter] back to menu  [q] quit")

@@ -128,3 +128,35 @@ func TestSessionReset(t *testing.T) {
 		t.Errorf("Timer.Remaining = %v, want %v", s.Timer.Remaining, w.Steps[0].Duration)
 	}
 }
+
+func TestNextStepOnCompletedSession(t *testing.T) {
+	w := newTestWorkflow(false)
+	s := NewSession(w)
+	s.CurrentStep = 2
+	s.NextStep() // completes the session
+
+	if !s.Completed {
+		t.Fatal("Session should be completed")
+	}
+
+	// calling NextStep on completed session should be a no-op
+	prevStep := s.CurrentStep
+	s.NextStep()
+
+	if s.CurrentStep != prevStep {
+		t.Errorf("CurrentStep changed from %d to %d, should remain unchanged", prevStep, s.CurrentStep)
+	}
+}
+
+func TestNewSessionWithEmptyWorkflow(t *testing.T) {
+	w := &workflow.Workflow{
+		Name:  "Empty",
+		Steps: []workflow.Step{},
+	}
+
+	s := NewSession(w)
+
+	if s != nil {
+		t.Error("NewSession should return nil for empty workflow")
+	}
+}

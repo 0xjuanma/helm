@@ -12,6 +12,9 @@ type Session struct {
 }
 
 func NewSession(w *workflow.Workflow) *Session {
+	if len(w.Steps) == 0 {
+		return nil
+	}
 	s := &Session{
 		Workflow:    w,
 		CurrentStep: 0,
@@ -33,6 +36,9 @@ func (s *Session) StepProgress() (current, total int) {
 }
 
 func (s *Session) NextStep() {
+	if s.Completed {
+		return
+	}
 	s.CurrentStep++
 	if s.CurrentStep >= s.Workflow.StepCount() {
 		if s.Workflow.Loop {

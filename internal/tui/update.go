@@ -20,7 +20,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tickMsg:
 		return m.handleTick()
 	case progress.FrameMsg:
-		// Handle progress bar animation frames
 		progressModel, cmd := m.progressBar.Update(msg)
 		m.progressBar = progressModel.(progress.Model)
 		return m, cmd
@@ -73,7 +72,6 @@ func (m Model) handleSelectKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) handleTimerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	// Handle input during transition phase
 	if m.transitioning {
 		return m.handleTransitionKey(msg)
 	}
@@ -106,25 +104,21 @@ func (m Model) handleTransitionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "q", "ctrl+c":
 		return m, tea.Sequence(setTitle(""), tea.Quit)
-	case " ":
-		// Skip transition countdown, start immediately
+	case " ": // skip countdown, start now
 		m.transitioning = false
 		m.session.Timer.Start()
 		return m, m.updateTitle()
-	case "r":
-		// Cancel transition, reset current stage timer
+	case "r": // cancel transition, reset timer
 		m.transitioning = false
 		m.session.Timer.Reset()
 		return m, m.updateTitle()
-	case "n":
-		// Skip to next stage (after the pending one)
+	case "n": // skip to next stage
 		m.transitioning = false
 		m.session.NextStep()
 		if m.session.Completed {
 			m.screen = screenComplete
 			return m, tea.Batch(setTitle("Helm - Complete"), bell())
 		}
-		// Enter new transition if auto-transition enabled for this workflow
 		if m.session.Workflow.AutoTransition {
 			m.transitioning = true
 			m.transitionTicks = m.cfg.GetTransitionDelay()
@@ -160,43 +154,33 @@ func (m Model) handleTick() (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	// Handle transition countdown
 	if m.transitioning {
 		m.transitionTicks--
 		if m.transitionTicks <= 0 {
-			// Transition complete - start next stage
 			m.transitioning = false
 			m.session.Timer.Start()
 		}
-		// Animate progress bar to 0 during transition
 		progressCmd := m.progressBar.SetPercent(0)
 		return m, tea.Batch(tickCmd(), m.updateTitle(), progressCmd)
 	}
 
-	// Normal tick handling
 	if m.session.Timer.Tick(tickInterval) {
 		m.session.NextStep()
 		if m.session.Completed {
 			m.screen = screenComplete
-			// Animate to full on completion
 			progressCmd := m.progressBar.SetPercent(1.0)
 			return m, tea.Batch(setTitle("Helm - Complete"), bell(), progressCmd)
 		}
-		// Check if auto-transition is enabled for this workflow
 		if m.session.Workflow.AutoTransition {
-			// Enter transition mode with configured delay
 			m.transitioning = true
 			m.transitionTicks = m.cfg.GetTransitionDelay()
-			// Animate progress bar to 0 for new stage
 			progressCmd := m.progressBar.SetPercent(0)
 			return m, tea.Batch(tickCmd(), m.updateTitle(), bell(), progressCmd)
 		}
-		// Manual transition - timer stays stopped, user presses spacebar
 		progressCmd := m.progressBar.SetPercent(0)
 		return m, tea.Batch(tickCmd(), m.updateTitle(), bell(), progressCmd)
 	}
 
-	// Update progress bar with smooth animation
 	progressCmd := m.progressBar.SetPercent(m.progress())
 	return m, tea.Batch(tickCmd(), m.updateTitle(), progressCmd)
 }
