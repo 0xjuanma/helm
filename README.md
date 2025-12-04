@@ -10,19 +10,15 @@
 [![GitHub Release](https://img.shields.io/github/v/release/0xjuanma/helm)](https://github.com/0xjuanma/helm/releases/latest)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/0xjuanma/helm/build.yml)](https://github.com/0xjuanma/helm/actions/workflows/build.yml)
 
-A minimalistic TUI Pomodoro-like timer designed for pure focus. Protect your focus and time.
+A minimalistic TUI Pomodoro-like timer designed for pure focus. Protect your focus and time. Customize timers, switch between modes, and control everything with simple keyboard shortcuts; right from your terminal.
+
+<img src="assets/helm-demo.gif" alt="Helm Demo" width="500">
 </div>
 
 ## Installation
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/0xjuanma/helm/main/scripts/install.sh | sh
-```
-
-Or with Go:
-
-```bash
-go install github.com/0xjuanma/helm@latest
 ```
 
 Or build from source:
@@ -36,13 +32,13 @@ go build
 
 ## Usage
 
-Run `helm` to launch the timer interface. You can configure your own workflows.
+Start the Helm timer interface by running `helm` in your terminal. From there, you can start, create and customize your own timer workflows to match your needs.
 
 ### Controls
 
 | Key | Action |
 |-----|--------|
-| `j/k` | Navigate |
+| `j/k` or <kbd>↑</kbd>/<kbd>↓</kbd> arrows | Navigate |
 | `enter` | Select |
 | `space` | Start/Pause |
 | `r` | Reset |
