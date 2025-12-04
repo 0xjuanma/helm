@@ -5,6 +5,14 @@
 ### Added
 
 ### Changed
+
+### Fixed
+
+## [0.5.0] - 2025-12-03
+
+### Added
+
+### Changed
 - Updated color scheme to helm logo brand colors
 
 ### Fixed
