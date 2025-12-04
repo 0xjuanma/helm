@@ -15,7 +15,7 @@ A minimalistic TUI Pomodoro-like timer designed for pure focus. Protect your foc
 <img src="assets/helm-demo.gif" alt="Helm Demo" width="500">
 </div>
 
-## Installation
+## Installation/Update
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/0xjuanma/helm/main/scripts/install.sh | sh
@@ -32,7 +32,7 @@ go build
 
 ## Usage
 
-Start the Helm timer interface by running `helm` in your terminal. From there, you can start, create and customize your own timer workflows to match your needs.
+Start the Helm TUI by running `helm` in your terminal. From there, you can start, create and customize your own timer workflows to match your needs.
 
 ### Controls
 
