@@ -5,8 +5,11 @@
 ### Added
 
 ### Changed
+- Updated color scheme to helm logo brand colors
 
 ### Fixed
+- Prevent panic when advancing past completed session
+- Prevent panic when creating session with empty workflow
 
 ## [0.4.0] - 2025-12-02
 
