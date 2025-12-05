@@ -20,6 +20,8 @@ const (
 	fieldStepDuration
 )
 
+// Sound menu indices are computed dynamically based on mode; see soundMenuItems.
+
 type editState struct {
 	workflowIdx int
 	stepIdx     int
@@ -40,10 +42,16 @@ func (m Model) updateCustomize(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.cursor--
 		}
 	case "down", "j":
-		if m.cursor < 1 {
+		if m.cursor < 2 {
 			m.cursor++
 		}
 	case "enter", " ":
+		if m.cursor == 2 {
+			m.screen = screenSound
+			m.cursor = 0
+			return m, nil
+		}
+
 		// 0 = Design (idx 1), 1 = Custom (idx 2)
 		workflowIdx := m.cursor + 1
 		m.edit = &editState{
@@ -241,10 +249,10 @@ func (m Model) saveWorkflow() (tea.Model, tea.Cmd) {
 
 func (m Model) viewCustomize() string {
 	title := titleStyle.Render("CUSTOMIZE")
-	subtitle := subtitleStyle.Render("Select workflow to edit")
+	subtitle := subtitleStyle.Render("Select workflow or sound to edit")
 
 	var items string
-	options := []string{"Design Interview", "Custom"}
+	options := []string{"Design Interview", "Custom", "Sound"}
 	for i, name := range options {
 		prefix := "  "
 		style := itemStyle
@@ -253,10 +261,22 @@ func (m Model) viewCustomize() string {
 			style = selectedItemStyle
 		}
 
-		workflowIdx := i + 1
 		var status string
-		if workflowIdx == 2 && m.cfg.Custom == nil {
-			status = " [empty]"
+		switch i {
+		case 1:
+			if m.cfg.Custom == nil {
+				status = " [empty]"
+			}
+		case 2:
+			mode := "bell"
+			if m.cfg.Sound.Mode == config.SoundModeMac {
+				mode = "mac"
+			}
+			if !m.cfg.Sound.Enabled {
+				status = " [off]"
+			} else {
+				status = fmt.Sprintf(" [%s]", mode)
+			}
 		}
 		line := fmt.Sprintf("%s%s%s", prefix, name, status)
 		items += style.Render(line) + "\n"
@@ -336,4 +356,161 @@ func (m Model) formatEditLine(idx int, text string) string {
 		style = selectedItemStyle
 	}
 	return style.Render(prefix + text)
+}
+
+func (m Model) updateSound(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	items := m.soundMenuItems()
+	switch msg.String() {
+	case "q", "ctrl+c":
+		return m, tea.Sequence(setTitle(""), tea.Quit)
+	case "esc":
+		m.screen = screenCustomize
+		m.cursor = 2
+		return m, nil
+	case "up", "k":
+		if m.cursor > 0 {
+			m.cursor--
+		}
+	case "down", "j":
+		if m.cursor < len(items)-1 {
+			m.cursor++
+		}
+	case "enter", " ":
+		return m.handleSoundSelect()
+	}
+	return m, nil
+}
+
+func (m Model) handleSoundSelect() (tea.Model, tea.Cmd) {
+	mode := m.cfg.Sound.Mode
+	macMode := mode == config.SoundModeMac
+	toneIdx := -1
+	testIdx := 2
+	backIdx := 3
+	if macMode {
+		toneIdx = 2
+		testIdx = 3
+		backIdx = 4
+	}
+
+	switch {
+	case m.cursor == 0:
+		m.cfg.Sound.Enabled = !m.cfg.Sound.Enabled
+	case m.cursor == 1:
+		m.cfg.Sound.Mode = nextSoundMode(m.cfg.Sound.Mode)
+		if m.cfg.Sound.Mode == config.SoundModeMac && m.cfg.Sound.Tone == "" {
+			m.cfg.Sound.Tone = config.DefaultMacTone
+		}
+	case macMode && m.cursor == toneIdx:
+		m.cfg.Sound.Tone = nextMacTone(m.cfg.Sound.Tone)
+	case m.cursor == testIdx:
+		return m, bell(m.cfg.Sound)
+	case m.cursor == backIdx:
+		m.screen = screenCustomize
+		m.cursor = 2
+		return m, nil
+	}
+
+	m.cfg.Sound.Normalize()
+	_ = config.Save(m.cfg)
+	return m, nil
+}
+
+func nextSoundMode(current config.SoundMode) config.SoundMode {
+	switch current {
+	case config.SoundModeTerminal:
+		return config.SoundModeMac
+	default:
+		return config.SoundModeTerminal
+	}
+}
+
+func nextMacTone(current string) string {
+	tone := current
+	if tone == "" {
+		tone = config.DefaultMacTone
+	}
+	tones := macTones()
+	for i, t := range tones {
+		if strings.EqualFold(t, tone) {
+			return tones[(i+1)%len(tones)]
+		}
+	}
+	return config.DefaultMacTone
+}
+
+func (m Model) viewSound() string {
+	title := titleStyle.Render("SOUND")
+	subtitle := subtitleStyle.Render("Configure sound alerts")
+
+	items := m.soundMenuItems()
+	lines := make([]string, len(items))
+	for i, item := range items {
+		lines[i] = m.formatSoundLine(i, item)
+	}
+
+	help := helpStyle.Render("[j/k] navigate  [enter] select  [esc] back  [q] quit")
+
+	content := strings.Join(lines, "\n")
+
+	return containerStyle.Render(
+		lipgloss.JoinVertical(lipgloss.Center, title, subtitle, "", content, "", help),
+	)
+}
+
+func (m Model) formatSoundLine(idx int, text string) string {
+	prefix := "  "
+	style := itemStyle
+	if m.cursor == idx {
+		prefix = "> "
+		style = selectedItemStyle
+	}
+	return style.Render(prefix + text)
+}
+
+func (m Model) soundMenuItems() []string {
+	enabledValue := "Off"
+	if m.cfg.Sound.Enabled {
+		enabledValue = "On"
+	}
+
+	modeLabel := "Terminal bell"
+	if m.cfg.Sound.Mode == config.SoundModeMac {
+		modeLabel = "macOS system sound"
+	}
+
+	items := []string{
+		fmt.Sprintf("Enabled: %s", enabledValue),
+		fmt.Sprintf("Mode: %s", modeLabel),
+	}
+
+	if m.cfg.Sound.Mode == config.SoundModeMac {
+		tone := m.cfg.Sound.Tone
+		if tone == "" {
+			tone = config.DefaultMacTone
+		}
+		items = append(items, fmt.Sprintf("Tone: %s", tone))
+	}
+
+	items = append(items, "Test sound", "Back")
+	return items
+}
+
+func macTones() []string {
+	return []string{
+		"Basso",
+		"Blow",
+		"Bottle",
+		"Frog",
+		"Funk",
+		"Glass",
+		"Hero",
+		"Morse",
+		"Ping",
+		"Pop",
+		"Purr",
+		"Sosumi",
+		"Submarine",
+		"Tink",
+	}
 }
