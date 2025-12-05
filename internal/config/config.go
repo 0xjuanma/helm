@@ -24,10 +24,26 @@ type WorkflowConfig struct {
 	AutoTransition bool         `json:"auto_transition"`
 }
 
+type SoundMode string
+
+const (
+	SoundModeTerminal SoundMode = "terminal"
+	SoundModeMac      SoundMode = "mac"
+)
+
+type SoundConfig struct {
+	Enabled bool      `json:"enabled"`
+	Mode    SoundMode `json:"mode"`
+	Tone    string    `json:"tone"`
+}
+
+const DefaultMacTone = "Ping"
+
 type Config struct {
 	Design             *WorkflowConfig `json:"design,omitempty"`
 	Custom             *WorkflowConfig `json:"custom,omitempty"`
 	TransitionDelaySec int             `json:"transition_delay_sec"` // Delay in seconds before next stage starts (1-10)
+	Sound              SoundConfig     `json:"sound"`
 }
 
 const (
@@ -35,6 +51,14 @@ const (
 	MinTransitionDelay     = 1
 	MaxTransitionDelay     = 10
 )
+
+func DefaultSoundConfig() SoundConfig {
+	return SoundConfig{
+		Enabled: true,
+		Mode:    SoundModeTerminal,
+		Tone:    DefaultMacTone,
+	}
+}
 
 func DefaultConfig() *Config {
 	return &Config{
@@ -51,6 +75,7 @@ func DefaultConfig() *Config {
 		},
 		Custom:             nil,
 		TransitionDelaySec: DefaultTransitionDelay,
+		Sound:              DefaultSoundConfig(),
 	}
 }
 
@@ -63,6 +88,10 @@ func (cfg *Config) GetTransitionDelay() int {
 		return MaxTransitionDelay
 	}
 	return cfg.TransitionDelaySec
+}
+
+func (cfg *Config) Normalize() {
+	cfg.Sound.Normalize()
 }
 
 func (cfg *Config) BuildWorkflows() []workflow.Workflow {
@@ -133,4 +162,20 @@ func (wc *WorkflowConfig) IsValid() bool {
 		}
 	}
 	return true
+}
+
+func (sc *SoundConfig) Normalize() {
+	if sc.Mode == "" && !sc.Enabled {
+		sc.Enabled = true
+		sc.Mode = SoundModeTerminal
+		return
+	}
+
+	if sc.Mode != SoundModeTerminal && sc.Mode != SoundModeMac {
+		sc.Mode = SoundModeTerminal
+	}
+
+	if sc.Tone == "" {
+		sc.Tone = DefaultMacTone
+	}
 }

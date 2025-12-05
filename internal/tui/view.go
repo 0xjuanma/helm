@@ -23,6 +23,8 @@ func (m Model) View() string {
 		content = m.viewCustomize()
 	case screenEdit:
 		content = m.viewEdit()
+	case screenSound:
+		content = m.viewSound()
 	}
 
 	if m.width > 0 && m.height > 0 {
