@@ -41,8 +41,6 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.updateCustomize(msg)
 	case screenEdit:
 		return m.updateEdit(msg)
-	case screenSound:
-		return m.updateSound(msg)
 	}
 	return m, nil
 }

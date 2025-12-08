@@ -21,7 +21,6 @@ const (
 	screenComplete
 	screenCustomize
 	screenEdit
-	screenSound
 )
 
 type tickMsg time.Time
