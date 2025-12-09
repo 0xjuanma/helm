@@ -285,7 +285,19 @@ func (m Model) viewCustomize() string {
 	subtitle := subtitleStyle.Render("Select a workflow to edit")
 
 	var items string
-	options := []string{"Design Interview", "Custom"}
+
+	// Get actual workflow names from config
+	designName := "Design Interview"
+	if m.cfg.Design != nil && m.cfg.Design.Name != "" {
+		designName = m.cfg.Design.Name
+	}
+
+	customName := "Custom"
+	if m.cfg.Custom != nil && m.cfg.Custom.Name != "" {
+		customName = m.cfg.Custom.Name
+	}
+
+	options := []string{designName, customName}
 	for i, name := range options {
 		prefix := "  "
 		style := itemStyle
