@@ -302,16 +302,6 @@ func (m Model) viewCustomize() string {
 		items += style.Render(line) + "\n"
 	}
 
-	soundStatus := "Sound: Off"
-	if m.cfg.Sound.Enabled {
-		mode := "Terminal bell"
-		if m.cfg.Sound.Mode == config.SoundModeMac {
-			mode = "macOS system sound"
-		}
-		soundStatus = fmt.Sprintf("Sound: On (%s)", mode)
-	}
-	items += itemStyle.Render("  "+soundStatus) + "\n"
-
 	help := helpStyle.Render("[j/k] navigate  [enter] edit  [esc] back  [q] quit")
 
 	return containerStyle.Render(
