@@ -189,28 +189,7 @@ func (m Model) handleTick() (tea.Model, tea.Cmd) {
 
 func (m *Model) startWorkflow(idx int) *timer.Session {
 	w := &m.workflows[idx]
-
-	// Get sound config for this workflow
-	var soundCfg config.SoundConfig
-	switch idx {
-	case 0: // Pomodoro - use default
-		soundCfg = config.DefaultSoundConfig()
-	case 1: // Design
-		if m.cfg.Design != nil && m.cfg.Design.Sound != nil {
-			soundCfg = *m.cfg.Design.Sound
-		} else {
-			soundCfg = config.DefaultSoundConfig()
-		}
-	case 2: // Custom
-		if m.cfg.Custom != nil && m.cfg.Custom.Sound != nil {
-			soundCfg = *m.cfg.Custom.Sound
-		} else {
-			soundCfg = config.DefaultSoundConfig()
-		}
-	}
-	soundCfg.Normalize()
-	m.currentSound = soundCfg
-
+	m.currentSound = m.cfg.GetWorkflowSound(idx)
 	return timer.NewSession(w)
 }
 

@@ -71,17 +71,15 @@ func Load() (*Config, error) {
 	if legacy.Sound != nil {
 		legacy.Sound.Normalize()
 
-		// Migrate to Design workflow if it doesn't have sound
-		if cfg.Design != nil && cfg.Design.Sound == nil {
-			soundCopy := *legacy.Sound
-			cfg.Design.Sound = &soundCopy
+		migrateSound := func(wc *WorkflowConfig) {
+			if wc != nil && wc.Sound == nil {
+				soundCopy := *legacy.Sound
+				wc.Sound = &soundCopy
+			}
 		}
 
-		// Migrate to Custom workflow if it doesn't have sound
-		if cfg.Custom != nil && cfg.Custom.Sound == nil {
-			soundCopy := *legacy.Sound
-			cfg.Custom.Sound = &soundCopy
-		}
+		migrateSound(cfg.Design)
+		migrateSound(cfg.Custom)
 	}
 
 	cfg.Normalize()

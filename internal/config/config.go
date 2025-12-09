@@ -99,6 +99,26 @@ func (cfg *Config) Normalize() {
 	}
 }
 
+// GetWorkflowSound returns the sound config for a workflow by index, or default if not set
+func (cfg *Config) GetWorkflowSound(idx int) SoundConfig {
+	var wc *WorkflowConfig
+	switch idx {
+	case 1: // Design
+		wc = cfg.Design
+	case 2: // Custom
+		wc = cfg.Custom
+	default: // Pomodoro (0) or invalid
+		return DefaultSoundConfig()
+	}
+
+	if wc != nil && wc.Sound != nil {
+		sound := *wc.Sound
+		sound.Normalize()
+		return sound
+	}
+	return DefaultSoundConfig()
+}
+
 func (cfg *Config) BuildWorkflows() []workflow.Workflow {
 	workflows := make([]workflow.Workflow, 3)
 
