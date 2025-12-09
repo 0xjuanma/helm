@@ -44,7 +44,6 @@ type Config struct {
 	Design             *WorkflowConfig `json:"design,omitempty"`
 	Custom             *WorkflowConfig `json:"custom,omitempty"`
 	TransitionDelaySec int             `json:"transition_delay_sec"` // Delay in seconds before next stage starts (1-10)
-	Sound              SoundConfig     `json:"sound"`
 }
 
 const (
@@ -76,7 +75,6 @@ func DefaultConfig() *Config {
 		},
 		Custom:             nil,
 		TransitionDelaySec: DefaultTransitionDelay,
-		Sound:              DefaultSoundConfig(),
 	}
 }
 
@@ -92,7 +90,6 @@ func (cfg *Config) GetTransitionDelay() int {
 }
 
 func (cfg *Config) Normalize() {
-	cfg.Sound.Normalize()
 	// Normalize sound configs in workflows
 	if cfg.Design != nil && cfg.Design.Sound != nil {
 		cfg.Design.Sound.Normalize()
