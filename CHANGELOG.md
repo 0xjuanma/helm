@@ -11,6 +11,7 @@
 ## [0.5.0] - 2025-12-03
 
 ### Added
+- Added support for sound alerts on timers (Thanks @muyiwaolurin!)
 
 ### Changed
 - Updated color scheme to helm logo brand colors
