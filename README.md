@@ -53,6 +53,10 @@ Start the Helm TUI by running `helm` in your terminal. From there, you can start
 - **Design Interview** - Structured interview practice (customizable)
 - **Custom** - Create your own workflow
 
-Settings are stored in `~/.helm/settings.json`. Press `c` to customize workflows.
+### Sound
+
+- Toggle alerts on/off and switch between the terminal bell or the default macOS system sound from the workflow editor (`c` → pick a workflow, then adjust the sound lines).
+
+Settings are stored in `~/.helm/settings.json`. Press `c` to customize workflows (sound settings live inside each editor).
 
 **Author:** [@0xjuanma](https://github.com/0xjuanma)

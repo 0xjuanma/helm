@@ -37,16 +37,21 @@ func Load() (*Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return DefaultConfig(), nil
+			cfg := DefaultConfig()
+			cfg.Normalize()
+			return cfg, nil
 		}
 		return nil, err
 	}
 
 	var cfg Config
 	if err := json.Unmarshal(data, &cfg); err != nil {
-		return DefaultConfig(), nil
+		cfg := DefaultConfig()
+		cfg.Normalize()
+		return cfg, nil
 	}
 
+	cfg.Normalize()
 	return &cfg, nil
 }
 

@@ -6,6 +6,8 @@ import (
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/0xjuanma/helm/internal/config"
+	"github.com/0xjuanma/helm/internal/sound"
 	"github.com/0xjuanma/helm/internal/timer"
 )
 
@@ -89,9 +91,9 @@ func (m Model) handleTimerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.session.NextStep()
 		if m.session.Completed {
 			m.screen = screenComplete
-			return m, tea.Batch(setTitle("Helm - Complete"), bell())
+			return m, tea.Batch(setTitle("Helm - Complete"), bell(m.cfg.Sound))
 		}
-		return m, tea.Batch(m.updateTitle(), bell())
+		return m, tea.Batch(m.updateTitle(), bell(m.cfg.Sound))
 	case "esc":
 		m.screen = screenSelect
 		m.session = nil
@@ -117,13 +119,13 @@ func (m Model) handleTransitionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.session.NextStep()
 		if m.session.Completed {
 			m.screen = screenComplete
-			return m, tea.Batch(setTitle("Helm - Complete"), bell())
+			return m, tea.Batch(setTitle("Helm - Complete"), bell(m.cfg.Sound))
 		}
 		if m.session.Workflow.AutoTransition {
 			m.transitioning = true
 			m.transitionTicks = m.cfg.GetTransitionDelay()
 		}
-		return m, tea.Batch(m.updateTitle(), bell())
+		return m, tea.Batch(m.updateTitle(), bell(m.cfg.Sound))
 	case "esc":
 		m.transitioning = false
 		m.screen = screenSelect
@@ -169,16 +171,16 @@ func (m Model) handleTick() (tea.Model, tea.Cmd) {
 		if m.session.Completed {
 			m.screen = screenComplete
 			progressCmd := m.progressBar.SetPercent(1.0)
-			return m, tea.Batch(setTitle("Helm - Complete"), bell(), progressCmd)
+			return m, tea.Batch(setTitle("Helm - Complete"), bell(m.cfg.Sound), progressCmd)
 		}
 		if m.session.Workflow.AutoTransition {
 			m.transitioning = true
 			m.transitionTicks = m.cfg.GetTransitionDelay()
 			progressCmd := m.progressBar.SetPercent(0)
-			return m, tea.Batch(tickCmd(), m.updateTitle(), bell(), progressCmd)
+			return m, tea.Batch(tickCmd(), m.updateTitle(), bell(m.cfg.Sound), progressCmd)
 		}
 		progressCmd := m.progressBar.SetPercent(0)
-		return m, tea.Batch(tickCmd(), m.updateTitle(), bell(), progressCmd)
+		return m, tea.Batch(tickCmd(), m.updateTitle(), bell(m.cfg.Sound), progressCmd)
 	}
 
 	progressCmd := m.progressBar.SetPercent(m.progress())
@@ -216,9 +218,9 @@ func setTitle(title string) tea.Cmd {
 	}
 }
 
-func bell() tea.Cmd {
+func bell(cfg config.SoundConfig) tea.Cmd {
 	return func() tea.Msg {
-		fmt.Print("\a")
+		sound.Play(cfg)
 		return nil
 	}
 }
