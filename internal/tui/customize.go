@@ -84,9 +84,16 @@ func (m *Model) initDraft() {
 	}
 	copy(draft.Steps, wc.Steps)
 	m.edit.draft = draft
-	soundCopy := m.cfg.Sound
-	soundCopy.Normalize()
-	m.edit.sound = soundCopy
+
+	// Load sound from workflow config, or use default if not set
+	if wc.Sound != nil {
+		soundCopy := *wc.Sound
+		soundCopy.Normalize()
+		m.edit.sound = soundCopy
+	} else {
+		// Use default otherwise
+		m.edit.sound = config.DefaultSoundConfig()
+	}
 }
 
 type editMenuLayout struct {
@@ -254,12 +261,15 @@ func (m Model) saveWorkflow() (tea.Model, tea.Cmd) {
 
 	m.edit.sound.Normalize()
 
+	// Always save sound config to workflow (even if unchanged, to ensure it's persisted)
+	soundCopy := m.edit.sound
+	m.edit.draft.Sound = &soundCopy
+
 	if m.edit.workflowIdx == 1 {
 		m.cfg.Design = m.edit.draft
 	} else {
 		m.cfg.Custom = m.edit.draft
 	}
-	m.cfg.Sound = m.edit.sound
 
 	_ = config.Save(m.cfg)
 	m.workflows = m.cfg.BuildWorkflows()

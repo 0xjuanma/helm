@@ -22,6 +22,7 @@ type WorkflowConfig struct {
 	Steps          []StepConfig `json:"steps"`
 	Loop           bool         `json:"loop"`
 	AutoTransition bool         `json:"auto_transition"`
+	Sound          *SoundConfig `json:"sound,omitempty"`
 }
 
 type SoundMode string
@@ -92,6 +93,13 @@ func (cfg *Config) GetTransitionDelay() int {
 
 func (cfg *Config) Normalize() {
 	cfg.Sound.Normalize()
+	// Normalize sound configs in workflows
+	if cfg.Design != nil && cfg.Design.Sound != nil {
+		cfg.Design.Sound.Normalize()
+	}
+	if cfg.Custom != nil && cfg.Custom.Sound != nil {
+		cfg.Custom.Sound.Normalize()
+	}
 }
 
 func (cfg *Config) BuildWorkflows() []workflow.Workflow {
