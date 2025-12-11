@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [0.6.0] - 2025-12-11
+
+### Added
 - Added support for sound alerts on timers (Thanks @muyiwaolurin!)
 
 ### Changed
