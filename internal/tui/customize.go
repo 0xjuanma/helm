@@ -84,27 +84,32 @@ func (m *Model) initDraft() {
 	}
 	copy(draft.Steps, wc.Steps)
 	m.edit.draft = draft
-	soundCopy := m.cfg.Sound
-	soundCopy.Normalize()
-	m.edit.sound = soundCopy
+
+	// Load sound from workflow config, or use default if not set
+	if wc.Sound != nil {
+		soundCopy := *wc.Sound
+		soundCopy.Normalize()
+		m.edit.sound = soundCopy
+	} else {
+		// Use default otherwise
+		m.edit.sound = config.DefaultSoundConfig()
+	}
 }
 
 type editMenuLayout struct {
-	soundEnabledIdx int
-	soundModeIdx    int
-	stepsStart      int
-	addIdx          int
-	saveIdx         int
-	cancelIdx       int
-	menuSize        int
+	soundIdx   int
+	stepsStart int
+	addIdx     int
+	saveIdx    int
+	cancelIdx  int
+	menuSize   int
 }
 
 func (m Model) editMenuLayout() editMenuLayout {
 	stepCount := len(m.edit.draft.Steps)
 	layout := editMenuLayout{
-		soundEnabledIdx: 3,
-		soundModeIdx:    4,
-		stepsStart:      5,
+		soundIdx:   3,
+		stepsStart: 4,
 	}
 	layout.addIdx = layout.stepsStart + stepCount
 	layout.saveIdx = layout.addIdx + 1
@@ -156,13 +161,8 @@ func (m Model) handleEditSelect() (tea.Model, tea.Cmd) {
 		m.edit.draft.Loop = !m.edit.draft.Loop
 	case m.cursor == 2:
 		m.edit.draft.AutoTransition = !m.edit.draft.AutoTransition
-	case m.cursor == layout.soundEnabledIdx:
-		m.edit.sound.Enabled = !m.edit.sound.Enabled
-	case m.cursor == layout.soundModeIdx:
-		m.edit.sound.Mode = nextSoundMode(m.edit.sound.Mode)
-		if m.edit.sound.Mode == config.SoundModeMac && m.edit.sound.Tone == "" {
-			m.edit.sound.Tone = config.DefaultMacTone
-		}
+	case m.cursor == layout.soundIdx:
+		m.cycleSoundState()
 	case m.cursor >= layout.stepsStart && m.cursor < layout.stepsStart+stepCount:
 		m.edit.stepIdx = m.cursor - layout.stepsStart
 		m.edit.field = fieldStepName
@@ -261,12 +261,15 @@ func (m Model) saveWorkflow() (tea.Model, tea.Cmd) {
 
 	m.edit.sound.Normalize()
 
+	// Always save sound config to workflow (even if unchanged, to ensure it's persisted)
+	soundCopy := m.edit.sound
+	m.edit.draft.Sound = &soundCopy
+
 	if m.edit.workflowIdx == 1 {
 		m.cfg.Design = m.edit.draft
 	} else {
 		m.cfg.Custom = m.edit.draft
 	}
-	m.cfg.Sound = m.edit.sound
 
 	_ = config.Save(m.cfg)
 	m.workflows = m.cfg.BuildWorkflows()
@@ -282,7 +285,19 @@ func (m Model) viewCustomize() string {
 	subtitle := subtitleStyle.Render("Select a workflow to edit")
 
 	var items string
-	options := []string{"Design Interview", "Custom"}
+
+	// Get actual workflow names from config
+	designName := "Design Interview"
+	if m.cfg.Design != nil && m.cfg.Design.Name != "" {
+		designName = m.cfg.Design.Name
+	}
+
+	customName := "Custom"
+	if m.cfg.Custom != nil && m.cfg.Custom.Name != "" {
+		customName = m.cfg.Custom.Name
+	}
+
+	options := []string{designName, customName}
 	for i, name := range options {
 		prefix := "  "
 		style := itemStyle
@@ -301,16 +316,6 @@ func (m Model) viewCustomize() string {
 		line := fmt.Sprintf("%s%s%s", prefix, name, status)
 		items += style.Render(line) + "\n"
 	}
-
-	soundStatus := "Sound: Off"
-	if m.cfg.Sound.Enabled {
-		mode := "Terminal bell"
-		if m.cfg.Sound.Mode == config.SoundModeMac {
-			mode = "macOS system sound"
-		}
-		soundStatus = fmt.Sprintf("Sound: On (%s)", mode)
-	}
-	items += itemStyle.Render("  "+soundStatus) + "\n"
 
 	help := helpStyle.Render("[j/k] navigate  [enter] edit  [esc] back  [q] quit")
 
@@ -344,25 +349,15 @@ func (m Model) viewEdit() string {
 	}
 	lines = append(lines, m.formatEditLine(2, fmt.Sprintf("Auto-Transition: %s", autoTransValue)))
 
-	soundValue := "Off"
+	soundLabel := "Sound: Off"
 	if m.edit.sound.Enabled {
-		modeLabel := "Terminal bell"
 		if m.edit.sound.Mode == config.SoundModeMac {
-			modeLabel = "macOS system sound"
+			soundLabel = "Sound: macOS system sound"
+		} else {
+			soundLabel = "Sound: Terminal bell"
 		}
-		soundValue = fmt.Sprintf("On (%s)", modeLabel)
 	}
-	lines = append(lines, m.formatEditLine(layout.soundEnabledIdx, fmt.Sprintf("Sound alerts: %s", soundValue)))
-
-	soundModeLabel := "Terminal bell"
-	if m.edit.sound.Mode == config.SoundModeMac {
-		soundModeLabel = "macOS system sound"
-	}
-	modeLine := fmt.Sprintf("Sound mode: %s", soundModeLabel)
-	if !m.edit.sound.Enabled {
-		modeLine += " (disabled)"
-	}
-	lines = append(lines, m.formatEditLine(layout.soundModeIdx, modeLine))
+	lines = append(lines, m.formatEditLine(layout.soundIdx, soundLabel))
 
 	for i, step := range m.edit.draft.Steps {
 		stepLine := fmt.Sprintf("  %s (%dm)", step.Name, step.Minutes)
@@ -408,11 +403,20 @@ func (m Model) formatEditLine(idx int, text string) string {
 	return style.Render(prefix + text)
 }
 
-func nextSoundMode(current config.SoundMode) config.SoundMode {
-	switch current {
-	case config.SoundModeTerminal:
-		return config.SoundModeMac
-	default:
-		return config.SoundModeTerminal
+func (m *Model) cycleSoundState() {
+	// Cycle through: Off → Terminal → Mac → Off
+	if !m.edit.sound.Enabled {
+		// Off → Terminal
+		m.edit.sound.Enabled = true
+		m.edit.sound.Mode = config.SoundModeTerminal
+	} else if m.edit.sound.Mode == config.SoundModeTerminal {
+		// Terminal → Mac
+		m.edit.sound.Mode = config.SoundModeMac
+		if m.edit.sound.Tone == "" {
+			m.edit.sound.Tone = config.DefaultMacTone
+		}
+	} else {
+		// Mac → Off
+		m.edit.sound.Enabled = false
 	}
 }

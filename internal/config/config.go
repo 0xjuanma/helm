@@ -22,6 +22,7 @@ type WorkflowConfig struct {
 	Steps          []StepConfig `json:"steps"`
 	Loop           bool         `json:"loop"`
 	AutoTransition bool         `json:"auto_transition"`
+	Sound          *SoundConfig `json:"sound,omitempty"`
 }
 
 type SoundMode string
@@ -43,7 +44,6 @@ type Config struct {
 	Design             *WorkflowConfig `json:"design,omitempty"`
 	Custom             *WorkflowConfig `json:"custom,omitempty"`
 	TransitionDelaySec int             `json:"transition_delay_sec"` // Delay in seconds before next stage starts (1-10)
-	Sound              SoundConfig     `json:"sound"`
 }
 
 const (
@@ -75,7 +75,6 @@ func DefaultConfig() *Config {
 		},
 		Custom:             nil,
 		TransitionDelaySec: DefaultTransitionDelay,
-		Sound:              DefaultSoundConfig(),
 	}
 }
 
@@ -91,7 +90,33 @@ func (cfg *Config) GetTransitionDelay() int {
 }
 
 func (cfg *Config) Normalize() {
-	cfg.Sound.Normalize()
+	// Normalize sound configs in workflows
+	if cfg.Design != nil && cfg.Design.Sound != nil {
+		cfg.Design.Sound.Normalize()
+	}
+	if cfg.Custom != nil && cfg.Custom.Sound != nil {
+		cfg.Custom.Sound.Normalize()
+	}
+}
+
+// GetWorkflowSound returns the sound config for a workflow by index, or default if not set
+func (cfg *Config) GetWorkflowSound(idx int) SoundConfig {
+	var wc *WorkflowConfig
+	switch idx {
+	case 1: // Design
+		wc = cfg.Design
+	case 2: // Custom
+		wc = cfg.Custom
+	default: // Pomodoro (0) or invalid
+		return DefaultSoundConfig()
+	}
+
+	if wc != nil && wc.Sound != nil {
+		sound := *wc.Sound
+		sound.Normalize()
+		return sound
+	}
+	return DefaultSoundConfig()
 }
 
 func (cfg *Config) BuildWorkflows() []workflow.Workflow {

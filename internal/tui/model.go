@@ -37,6 +37,7 @@ type Model struct {
 	height          int
 	transitioning   bool
 	transitionTicks int
+	currentSound    config.SoundConfig
 }
 
 func NewModel() Model {

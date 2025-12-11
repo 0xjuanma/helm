@@ -91,9 +91,9 @@ func (m Model) handleTimerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.session.NextStep()
 		if m.session.Completed {
 			m.screen = screenComplete
-			return m, tea.Batch(setTitle("Helm - Complete"), bell(m.cfg.Sound))
+			return m, tea.Batch(setTitle("Helm - Complete"), bell(m.currentSound))
 		}
-		return m, tea.Batch(m.updateTitle(), bell(m.cfg.Sound))
+		return m, tea.Batch(m.updateTitle(), bell(m.currentSound))
 	case "esc":
 		m.screen = screenSelect
 		m.session = nil
@@ -119,13 +119,13 @@ func (m Model) handleTransitionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.session.NextStep()
 		if m.session.Completed {
 			m.screen = screenComplete
-			return m, tea.Batch(setTitle("Helm - Complete"), bell(m.cfg.Sound))
+			return m, tea.Batch(setTitle("Helm - Complete"), bell(m.currentSound))
 		}
 		if m.session.Workflow.AutoTransition {
 			m.transitioning = true
 			m.transitionTicks = m.cfg.GetTransitionDelay()
 		}
-		return m, tea.Batch(m.updateTitle(), bell(m.cfg.Sound))
+		return m, tea.Batch(m.updateTitle(), bell(m.currentSound))
 	case "esc":
 		m.transitioning = false
 		m.screen = screenSelect
@@ -171,24 +171,25 @@ func (m Model) handleTick() (tea.Model, tea.Cmd) {
 		if m.session.Completed {
 			m.screen = screenComplete
 			progressCmd := m.progressBar.SetPercent(1.0)
-			return m, tea.Batch(setTitle("Helm - Complete"), bell(m.cfg.Sound), progressCmd)
+			return m, tea.Batch(setTitle("Helm - Complete"), bell(m.currentSound), progressCmd)
 		}
 		if m.session.Workflow.AutoTransition {
 			m.transitioning = true
 			m.transitionTicks = m.cfg.GetTransitionDelay()
 			progressCmd := m.progressBar.SetPercent(0)
-			return m, tea.Batch(tickCmd(), m.updateTitle(), bell(m.cfg.Sound), progressCmd)
+			return m, tea.Batch(tickCmd(), m.updateTitle(), bell(m.currentSound), progressCmd)
 		}
 		progressCmd := m.progressBar.SetPercent(0)
-		return m, tea.Batch(tickCmd(), m.updateTitle(), bell(m.cfg.Sound), progressCmd)
+		return m, tea.Batch(tickCmd(), m.updateTitle(), bell(m.currentSound), progressCmd)
 	}
 
 	progressCmd := m.progressBar.SetPercent(m.progress())
 	return m, tea.Batch(tickCmd(), m.updateTitle(), progressCmd)
 }
 
-func (m Model) startWorkflow(idx int) *timer.Session {
+func (m *Model) startWorkflow(idx int) *timer.Session {
 	w := &m.workflows[idx]
+	m.currentSound = m.cfg.GetWorkflowSound(idx)
 	return timer.NewSession(w)
 }
 
