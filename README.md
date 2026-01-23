@@ -17,11 +17,19 @@ A minimalistic TUI Pomodoro-like timer designed for pure focus. Protect your foc
 
 ## Installation/Update
 
+### Homebrew
+
+```bash
+brew install 0xjuanma/tap/helm
+```
+
+### Script
+
 ```bash
 curl -sSL https://raw.githubusercontent.com/0xjuanma/helm/main/scripts/install.sh | sh
 ```
 
-Or build from source:
+### Build from Source
 
 ```bash
 git clone https://github.com/0xjuanma/helm.git
