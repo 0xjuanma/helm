@@ -19,3 +19,14 @@ func Pomodoro() Workflow {
 		},
 	}
 }
+
+func Quick(d time.Duration) Workflow {
+	return Workflow{
+		Name:           "QUICK TIMER",
+		Loop:           false,
+		AutoTransition: false,
+		Steps: []Step{
+			{Name: "QUICK TIMER", Duration: d},
+		},
+	}
+}
