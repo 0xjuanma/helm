@@ -66,6 +66,9 @@ func NewQuickModel(minutes int) Model {
 }
 
 func (m Model) Init() tea.Cmd {
+	if m.screen == screenTimer && m.session != nil {
+		return tickCmd()
+	}
 	return nil
 }
 
