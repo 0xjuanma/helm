@@ -60,6 +60,7 @@ Start the Helm TUI by running `helm` in your terminal. From there, you can start
 - **Pomodoro** - Classic 25/5 minute work/break cycle
 - **Design Interview** - Structured interview practice (customizable)
 - **Custom** - Create your own workflow
+- **Quick Timer** - `helm --quick <minutes>` for a single-stage timer, no menu
 
 ### Sound
 
