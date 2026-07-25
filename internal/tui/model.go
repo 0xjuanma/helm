@@ -51,6 +51,20 @@ func NewModel() Model {
 	}
 }
 
+func NewQuickModel(minutes int) Model {
+	cfg, _ := config.Load()
+	w := workflow.Quick(time.Duration(minutes) * time.Minute)
+	return Model{
+		screen:       screenTimer,
+		workflows:    cfg.BuildWorkflows(),
+		cfg:          cfg,
+		cursor:       0,
+		session:      timer.NewSession(&w),
+		progressBar:  newProgressBar(),
+		currentSound: config.DefaultSoundConfig(),
+	}
+}
+
 func (m Model) Init() tea.Cmd {
 	return nil
 }
