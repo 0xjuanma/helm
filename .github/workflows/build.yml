@@ -35,7 +35,7 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          go build -ldflags="-s -w" -o helm-${{ matrix.goos }}-${{ matrix.goarch }} .
+          go build -ldflags="-s -w -X github.com/0xjuanma/helm/cmd.Version=${{ github.ref_name }}" -o helm-${{ matrix.goos }}-${{ matrix.goarch }} .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
