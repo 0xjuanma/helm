@@ -11,13 +11,28 @@ import (
 	"github.com/0xjuanma/helm/internal/tui"
 )
 
+// Version is set at build time via -ldflags
+var Version = "dev"
+
 var quickMinutes int
+var versionFlag bool
+var updateFlag bool
 
 var rootCmd = &cobra.Command{
 	Use:   "helm",
 	Short: "Helm - A minimalistic TUI timer",
 	Long:  "Helm is a minimalistic TUI timer designed for pure focus",
 	RunE: func(cmd *cobra.Command, _ []string) error {
+		if versionFlag {
+			fmt.Println(tui.TitleStyle.Render(tui.Logo))
+			fmt.Println(Version)
+			return nil
+		}
+
+		if updateFlag {
+			return runUpdate()
+		}
+
 		var m tea.Model
 		if cmd.Flags().Changed("quick") {
 			if err := validateQuickMinutes(quickMinutes); err != nil {
@@ -35,6 +50,8 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.Flags().IntVar(&quickMinutes, "quick", 0, "start a quick timer for the given number of minutes")
+	rootCmd.Flags().BoolVarP(&versionFlag, "version", "v", false, "display version information")
+	rootCmd.Flags().BoolVarP(&updateFlag, "update", "u", false, "update helm to the latest version")
 }
 
 func validateQuickMinutes(m int) error {
