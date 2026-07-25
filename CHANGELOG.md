@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [0.7.0] - 2026-07-24
+
+### Added
 - Added `--quick` flag to start a single-stage timer without the menu (e.g. `helm --quick 10`)
 
 ### Changed
