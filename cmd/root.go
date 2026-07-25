@@ -25,7 +25,7 @@ var rootCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		if versionFlag {
 			fmt.Println(tui.TitleStyle.Render(tui.Logo))
-			fmt.Println(Version)
+			fmt.Println(tui.TitleStyle.Render(Version))
 			return nil
 		}
 
