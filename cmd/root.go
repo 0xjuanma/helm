@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
@@ -24,8 +25,9 @@ var rootCmd = &cobra.Command{
 	Long:  "Helm is a minimalistic TUI timer designed for pure focus",
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		if versionFlag {
-			fmt.Println(tui.TitleStyle.Render(tui.Logo))
-			fmt.Println(tui.TitleStyle.Render(Version))
+			lines := strings.Split(tui.Logo, "\n")
+			lines[0] += "  " + Version
+			fmt.Println(tui.TitleStyle.Render(strings.Join(lines, "\n")))
 			return nil
 		}
 
