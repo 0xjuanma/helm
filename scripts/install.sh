@@ -1,6 +1,12 @@
 #!/bin/sh
 set -e
 
+cat <<'LOGO'
+╻ ╻┏━╸╻  ┏┳┓
+┣━┫┣╸ ┃  ┃┃┃
+╹ ╹┗━╸┗━╸╹ ╹
+LOGO
+
 REPO="0xjuanma/helm"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 
