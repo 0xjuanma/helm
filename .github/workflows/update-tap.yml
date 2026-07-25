@@ -1,0 +1,20 @@
+name: Update Homebrew Tap
+
+on:
+  repository_dispatch:
+    types: [release-published]
+
+permissions:
+  contents: read
+
+jobs:
+  update-tap:
+    # Use @main for newest version, or pin to specific version like @v1.0.0
+    uses: 0xjuanma/simple-release/.github/workflows/reusable-update-tap.yml@main
+    with:
+      tap-repo: '0xjuanma/homebrew-tap'
+      project-name: 'helm'
+      formula-path: 'helm.rb'
+      github-repo: '0xjuanma/helm'
+    secrets:
+      token: ${{ secrets.TAP_TOKEN }}
