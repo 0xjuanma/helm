@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [0.8.0] - 2026-07-25
+
+### Added
 - Added `--version`/`-v` flag to display the current release version
 - Added `--update`/`-u` flag to update helm to the latest release (via Homebrew or the install script)
 
