@@ -5,6 +5,7 @@
 ### Added
 
 ### Changed
+- Config storage now uses XDG-aware paths on Linux (`$XDG_CONFIG_HOME/helm` or `~/.config/helm`) instead of always `~/.helm`; existing `~/.helm` configs are migrated automatically on first load. macOS/Windows behavior is unchanged.
 
 ### Fixed
 
