@@ -4,28 +4,33 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
+	"github.com/0xjuanma/cli-toolkit/dirs"
 )
 
 const (
-	configDir  = ".helm"
+	appName    = "helm"
 	configFile = "settings.json"
 )
 
 func configPath() (string, error) {
-	home, err := os.UserHomeDir()
+	dir, err := dirs.New(appName).ConfigDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, configDir, configFile), nil
+	return filepath.Join(dir, configFile), nil
 }
 
-func ensureConfigDir() error {
+// readLegacyConfig reads settings from helm's pre-XDG location (~/.helm),
+// used before the config store moved to dirs.ConfigDir(). Kept as a
+// one-time fallback so existing users don't silently lose their config on
+// Linux, where the new path differs from the old one.
+func readLegacyConfig() ([]byte, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	dir := filepath.Join(home, configDir)
-	return os.MkdirAll(dir, 0755)
+	return os.ReadFile(filepath.Join(home, ".helm", configFile))
 }
 
 // legacyConfig is used to unmarshal old config files that may have a global Sound field
@@ -44,12 +49,17 @@ func Load() (*Config, error) {
 
 	data, err := os.ReadFile(path)
 	if err != nil {
-		if os.IsNotExist(err) {
+		if !os.IsNotExist(err) {
+			return nil, err
+		}
+
+		legacyData, legacyErr := readLegacyConfig()
+		if legacyErr != nil {
 			cfg := DefaultConfig()
 			cfg.Normalize()
 			return cfg, nil
 		}
-		return nil, err
+		data = legacyData
 	}
 
 	// First, try to unmarshal as legacy config to handle old format
@@ -84,17 +94,14 @@ func Load() (*Config, error) {
 
 	cfg.Normalize()
 
-	// Save migrated config back to disk to clean up old format
+	// Save back to disk: cleans up old-format JSON, and migrates a
+	// legacy-path config onto the new XDG-aware location.
 	_ = Save(cfg)
 
 	return cfg, nil
 }
 
 func Save(cfg *Config) error {
-	if err := ensureConfigDir(); err != nil {
-		return err
-	}
-
 	path, err := configPath()
 	if err != nil {
 		return err
