@@ -6,7 +6,6 @@
 <div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Go Report Card](https://goreportcard.com/badge/github.com/0xjuanma/helm)](https://goreportcard.com/report/github.com/0xjuanma/helm)
 [![GitHub Release](https://img.shields.io/github/v/release/0xjuanma/helm)](https://github.com/0xjuanma/helm/releases/latest)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/0xjuanma/helm/build.yml)](https://github.com/0xjuanma/helm/actions/workflows/build.yml)
 
@@ -16,6 +15,8 @@ A minimalistic TUI Pomodoro-like timer designed for pure focus. Protect your foc
 </div>
 
 ## Installation/Update
+
+**Self-update**: Run `helm --update` anytime to get the latest version.
 
 ### Homebrew
 
@@ -61,8 +62,6 @@ Start the Helm TUI by running `helm` in your terminal. From there, you can start
 - **Design Interview** - Structured interview practice (customizable)
 - **Custom** - Create your own workflow
 - **Quick Timer** - `helm --quick <minutes>` for a single-stage timer, no menu
-- **Version** - `helm --version` or `helm -v` to display the current version
-- **Update** - `helm --update` or `helm -u` to update to the latest release
 
 ### Sound
 
@@ -70,4 +69,8 @@ Start the Helm TUI by running `helm` in your terminal. From there, you can start
 
 Settings are stored in `~/.helm/settings.json`. Press `c` to customize workflows (sound settings live inside each editor).
 
-**Author:** [@0xjuanma](https://github.com/0xjuanma)
+<div align="center">
+
+Author: [@0xjuanma](https://github.com/0xjuanma)
+
+</div>
