@@ -10,6 +10,11 @@ LOGO
 REPO="0xjuanma/helm"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 
+if command -v brew >/dev/null 2>&1 && brew list 0xjuanma/tap/helm >/dev/null 2>&1; then
+    echo "helm is managed by Homebrew. Run 'brew upgrade helm' instead."
+    exit 0
+fi
+
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
 
