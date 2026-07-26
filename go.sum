@@ -1,3 +1,5 @@
+github.com/0xjuanma/cli-toolkit v0.1.0 h1:MvRSVUBhixqOkYLwg43xzW26jJuX15QUm2Rj2vMzszQ=
+github.com/0xjuanma/cli-toolkit v0.1.0/go.mod h1:lHLFRUaicFHF3gwxgW6AYqBvvWvm7AFBP+ezoWaYJjU=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1 h1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1/go.mod h1:uYgXzlJ7ZpABp8OJ+exZzJJhRNQ2ASbcXHWsFqH8hp8=
 github.com/charmbracelet/bubbles v0.21.0 h1:9TdC97SdRVg/1aaXNVWfFH3nnLAwOXr8Fn6u6mfQdFs=
