@@ -14,7 +14,7 @@ var (
 	muted     = lipgloss.AdaptiveColor{Light: "#AAAAAA", Dark: "#555555"}
 	white     = lipgloss.AdaptiveColor{Light: "#333333", Dark: "#FFFFFF"}
 
-	titleStyle = lipgloss.NewStyle().
+	TitleStyle = lipgloss.NewStyle().
 			Bold(true).
 			Foreground(highlight)
 

@@ -32,7 +32,7 @@ func (m Model) View() string {
 }
 
 func (m Model) viewSelect() string {
-	title := titleStyle.Render(logo)
+	title := TitleStyle.Render(Logo)
 	subtitle := subtitleStyle.Render("Select a workflow")
 
 	var items string

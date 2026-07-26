@@ -61,6 +61,8 @@ Start the Helm TUI by running `helm` in your terminal. From there, you can start
 - **Design Interview** - Structured interview practice (customizable)
 - **Custom** - Create your own workflow
 - **Quick Timer** - `helm --quick <minutes>` for a single-stage timer, no menu
+- **Version** - `helm --version` or `helm -v` to display the current version
+- **Update** - `helm --update` or `helm -u` to update to the latest release
 
 ### Sound
 

@@ -1,5 +1,5 @@
 package tui
 
-const logo = `╻ ╻┏━╸╻  ┏┳┓
+const Logo = `╻ ╻┏━╸╻  ┏┳┓
 ┣━┫┣╸ ┃  ┃┃┃
 ╹ ╹┗━╸┗━╸╹ ╹`

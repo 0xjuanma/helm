@@ -281,7 +281,7 @@ func (m Model) saveWorkflow() (tea.Model, tea.Cmd) {
 }
 
 func (m Model) viewCustomize() string {
-	title := titleStyle.Render("CUSTOMIZE")
+	title := TitleStyle.Render("CUSTOMIZE")
 	subtitle := subtitleStyle.Render("Select a workflow to edit")
 
 	var items string
@@ -325,7 +325,7 @@ func (m Model) viewCustomize() string {
 }
 
 func (m Model) viewEdit() string {
-	title := titleStyle.Render("EDIT WORKFLOW")
+	title := TitleStyle.Render("EDIT WORKFLOW")
 
 	var lines []string
 	layout := m.editMenuLayout()
