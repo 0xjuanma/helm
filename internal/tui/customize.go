@@ -212,7 +212,7 @@ func (m Model) updateEditInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		char := msg.String()
 		if len(char) == 1 {
 			if m.edit.field == fieldStepDuration {
-				if char >= "0" && char <= "9" && len(m.edit.input) < 2 {
+				if char >= "0" && char <= "9" && len(m.edit.input) < 3 {
 					m.edit.input += char
 				}
 			} else {

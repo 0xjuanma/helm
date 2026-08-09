@@ -10,8 +10,9 @@ func TestValidateQuickMinutes(t *testing.T) {
 		{1, false},
 		{60, false},
 		{10, false},
+		{180, false},
 		{0, true},
-		{61, true},
+		{181, true},
 		{-5, true},
 	}
 

@@ -8,7 +8,7 @@ import (
 
 const (
 	MaxSteps       = 10
-	MaxStepMinutes = 60
+	MaxStepMinutes = 180
 	MinStepMinutes = 1
 )
 
