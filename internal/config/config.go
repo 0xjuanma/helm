@@ -43,6 +43,8 @@ const DefaultMacTone = "Ping"
 type Config struct {
 	Design             *WorkflowConfig `json:"design,omitempty"`
 	Custom             *WorkflowConfig `json:"custom,omitempty"`
+	Custom2            *WorkflowConfig `json:"custom2,omitempty"`
+	Custom3            *WorkflowConfig `json:"custom3,omitempty"`
 	TransitionDelaySec int             `json:"transition_delay_sec"` // Delay in seconds before next stage starts (1-10)
 }
 
@@ -74,6 +76,8 @@ func DefaultConfig() *Config {
 			},
 		},
 		Custom:             nil,
+		Custom2:            nil,
+		Custom3:            nil,
 		TransitionDelaySec: DefaultTransitionDelay,
 	}
 }
@@ -97,20 +101,49 @@ func (cfg *Config) Normalize() {
 	if cfg.Custom != nil && cfg.Custom.Sound != nil {
 		cfg.Custom.Sound.Normalize()
 	}
+	if cfg.Custom2 != nil && cfg.Custom2.Sound != nil {
+		cfg.Custom2.Sound.Normalize()
+	}
+	if cfg.Custom3 != nil && cfg.Custom3.Sound != nil {
+		cfg.Custom3.Sound.Normalize()
+	}
+}
+
+// WorkflowConfigAt returns the *WorkflowConfig backing customizable slot idx (1-4), or nil for
+// an out-of-range idx (including the immutable Pomodoro slot, 0).
+func (cfg *Config) WorkflowConfigAt(idx int) *WorkflowConfig {
+	switch idx {
+	case 1:
+		return cfg.Design
+	case 2:
+		return cfg.Custom
+	case 3:
+		return cfg.Custom2
+	case 4:
+		return cfg.Custom3
+	default:
+		return nil
+	}
+}
+
+// SetWorkflowConfigAt sets the *WorkflowConfig backing customizable slot idx (1-4). No-op for
+// an out-of-range idx.
+func (cfg *Config) SetWorkflowConfigAt(idx int, wc *WorkflowConfig) {
+	switch idx {
+	case 1:
+		cfg.Design = wc
+	case 2:
+		cfg.Custom = wc
+	case 3:
+		cfg.Custom2 = wc
+	case 4:
+		cfg.Custom3 = wc
+	}
 }
 
 // GetWorkflowSound returns the sound config for a workflow by index, or default if not set
 func (cfg *Config) GetWorkflowSound(idx int) SoundConfig {
-	var wc *WorkflowConfig
-	switch idx {
-	case 1: // Design
-		wc = cfg.Design
-	case 2: // Custom
-		wc = cfg.Custom
-	default: // Pomodoro (0) or invalid
-		return DefaultSoundConfig()
-	}
-
+	wc := cfg.WorkflowConfigAt(idx)
 	if wc != nil && wc.Sound != nil {
 		sound := *wc.Sound
 		sound.Normalize()
@@ -120,7 +153,7 @@ func (cfg *Config) GetWorkflowSound(idx int) SoundConfig {
 }
 
 func (cfg *Config) BuildWorkflows() []workflow.Workflow {
-	workflows := make([]workflow.Workflow, 3)
+	workflows := make([]workflow.Workflow, 5)
 
 	// Slot 0: Pomodoro (immutable)
 	workflows[0] = workflow.Pomodoro()
@@ -132,11 +165,13 @@ func (cfg *Config) BuildWorkflows() []workflow.Workflow {
 		workflows[1] = DefaultConfig().Design.ToWorkflow()
 	}
 
-	// Slot 2: Custom (user-created)
-	if cfg.Custom != nil {
-		workflows[2] = cfg.Custom.ToWorkflow()
-	} else {
-		workflows[2] = workflow.Workflow{Name: "Empty - press [c] to customize", AutoTransition: true}
+	// Slots 2-4: Custom, Custom2, Custom3 (user-created)
+	for idx := 2; idx <= 4; idx++ {
+		if wc := cfg.WorkflowConfigAt(idx); wc != nil {
+			workflows[idx] = wc.ToWorkflow()
+		} else {
+			workflows[idx] = workflow.Workflow{Name: "Empty - press [c] to customize", AutoTransition: true}
+		}
 	}
 
 	return workflows

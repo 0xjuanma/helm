@@ -41,11 +41,11 @@ func (m Model) updateCustomize(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.cursor--
 		}
 	case "down", "j":
-		if m.cursor < 1 {
+		if m.cursor < 3 {
 			m.cursor++
 		}
 	case "enter", " ":
-		// 0 = Design (idx 1), 1 = Custom (idx 2)
+		// 0 = Design (idx 1), 1 = Custom (idx 2), 2 = Custom2 (idx 3), 3 = Custom3 (idx 4)
 		workflowIdx := m.cursor + 1
 		m.edit = &editState{
 			workflowIdx: workflowIdx,
@@ -59,17 +59,25 @@ func (m Model) updateCustomize(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m *Model) initDraft() {
-	var wc *config.WorkflowConfig
-	if m.edit.workflowIdx == 1 {
-		wc = m.cfg.Design
-	} else {
-		wc = m.cfg.Custom
+// defaultSlotName returns the fallback display name for customizable slot idx
+// before the user has named it themselves.
+func defaultSlotName(idx int) string {
+	switch idx {
+	case 3:
+		return "Custom Timer 2"
+	case 4:
+		return "Custom Timer 3"
+	default:
+		return "Custom"
 	}
+}
+
+func (m *Model) initDraft() {
+	wc := m.cfg.WorkflowConfigAt(m.edit.workflowIdx)
 
 	if wc == nil {
 		wc = &config.WorkflowConfig{
-			Name:           "Custom",
+			Name:           defaultSlotName(m.edit.workflowIdx),
 			Steps:          []config.StepConfig{{Name: "STEP 1", Minutes: 10}},
 			Loop:           false,
 			AutoTransition: true,
@@ -265,11 +273,7 @@ func (m Model) saveWorkflow() (tea.Model, tea.Cmd) {
 	soundCopy := m.edit.sound
 	m.edit.draft.Sound = &soundCopy
 
-	if m.edit.workflowIdx == 1 {
-		m.cfg.Design = m.edit.draft
-	} else {
-		m.cfg.Custom = m.edit.draft
-	}
+	m.cfg.SetWorkflowConfigAt(m.edit.workflowIdx, m.edit.draft)
 
 	_ = config.Save(m.cfg)
 	m.workflows = m.cfg.BuildWorkflows()
@@ -292,12 +296,15 @@ func (m Model) viewCustomize() string {
 		designName = m.cfg.Design.Name
 	}
 
-	customName := "Custom"
-	if m.cfg.Custom != nil && m.cfg.Custom.Name != "" {
-		customName = m.cfg.Custom.Name
+	options := []string{designName}
+	for idx := 2; idx <= 4; idx++ {
+		name := defaultSlotName(idx)
+		if wc := m.cfg.WorkflowConfigAt(idx); wc != nil && wc.Name != "" {
+			name = wc.Name
+		}
+		options = append(options, name)
 	}
 
-	options := []string{designName, customName}
 	for i, name := range options {
 		prefix := "  "
 		style := itemStyle
@@ -307,11 +314,8 @@ func (m Model) viewCustomize() string {
 		}
 
 		var status string
-		switch i {
-		case 1:
-			if m.cfg.Custom == nil {
-				status = " [empty]"
-			}
+		if i >= 1 && m.cfg.WorkflowConfigAt(i+1) == nil {
+			status = " [empty]"
 		}
 		line := fmt.Sprintf("%s%s%s", prefix, name, status)
 		items += style.Render(line) + "\n"

@@ -37,6 +37,8 @@ func readLegacyConfig() ([]byte, error) {
 type legacyConfig struct {
 	Design             *WorkflowConfig `json:"design,omitempty"`
 	Custom             *WorkflowConfig `json:"custom,omitempty"`
+	Custom2            *WorkflowConfig `json:"custom2,omitempty"`
+	Custom3            *WorkflowConfig `json:"custom3,omitempty"`
 	TransitionDelaySec int             `json:"transition_delay_sec"`
 	Sound              *SoundConfig    `json:"sound,omitempty"` // Legacy field, will be migrated
 }
@@ -74,6 +76,8 @@ func Load() (*Config, error) {
 	cfg := &Config{
 		Design:             legacy.Design,
 		Custom:             legacy.Custom,
+		Custom2:            legacy.Custom2,
+		Custom3:            legacy.Custom3,
 		TransitionDelaySec: legacy.TransitionDelaySec,
 	}
 
@@ -90,6 +94,8 @@ func Load() (*Config, error) {
 
 		migrateSound(cfg.Design)
 		migrateSound(cfg.Custom)
+		migrateSound(cfg.Custom2)
+		migrateSound(cfg.Custom3)
 	}
 
 	cfg.Normalize()

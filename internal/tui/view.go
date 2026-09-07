@@ -45,7 +45,7 @@ func (m Model) viewSelect() string {
 		}
 
 		// Handle empty custom slot
-		if i == 2 && m.cfg.Custom == nil {
+		if i >= 2 && m.cfg.WorkflowConfigAt(i) == nil {
 			line := fmt.Sprintf("%s%s", prefix, w.Name)
 			items += style.Render(line) + "\n"
 			continue

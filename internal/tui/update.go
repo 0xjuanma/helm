@@ -59,7 +59,7 @@ func (m Model) handleSelectKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	case "enter", " ":
 		// Don't start empty workflow
-		if m.cursor == 2 && m.cfg.Custom == nil {
+		if m.cursor >= 2 && m.cfg.WorkflowConfigAt(m.cursor) == nil {
 			return m, nil
 		}
 		m.session = m.startWorkflow(m.cursor)
