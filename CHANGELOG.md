@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [0.9.0] - 2026-09-07
+
+### Added
 - Added 2 more customizable workflow slots to the main menu, for a total of 4 custom timers alongside Pomodoro
 
 ### Changed
