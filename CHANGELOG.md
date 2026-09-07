@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- Added 2 more customizable workflow slots to the main menu, for a total of 4 custom timers alongside Pomodoro
 
 ### Changed
 - Raised the max timer/break duration limit to 180 minutes, up from 60 (Thanks @theOnlySuhail!)
