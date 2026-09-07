@@ -5,6 +5,7 @@
 ### Added
 
 ### Changed
+- Raised the max timer/break duration limit to 180 minutes, up from 60 (Thanks @theOnlySuhail!)
 
 ### Fixed
 
