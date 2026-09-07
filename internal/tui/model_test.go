@@ -32,7 +32,7 @@ func TestNewQuickModel(t *testing.T) {
 	if m.cfg == nil {
 		t.Error("cfg should not be nil")
 	}
-	if len(m.workflows) != 3 {
-		t.Errorf("len(workflows) = %d, want 3", len(m.workflows))
+	if len(m.workflows) != 5 {
+		t.Errorf("len(workflows) = %d, want 5", len(m.workflows))
 	}
 }
